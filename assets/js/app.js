@@ -129,7 +129,7 @@
   ];
 
   const pageMap = {
-    home: "home.html",
+    home: "index.html",
     search: "search.html",
     details: "book-details.html",
     account: "account.html",
