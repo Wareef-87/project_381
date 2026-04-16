@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YIC Library | Contact</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="contact">
+  <header class="site-header">
+    <a href="home.html" class="brand-link" aria-label="Book Hub home page">
+      <span class="brand-name">Book Hub</span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="home.html">Home</a>
+      <a href="search.html">Search</a>
+      <a href="account.html">My Account</a>
+      <a href="contact.html" aria-current="page">Contact</a>
+      <a href="login.html" class="button-link">Login</a>
+    </nav>
+  </header>
+
+  <main class="page-shell">
+    <section class="section-shell two-column-grid">
+      <article class="info-card">
+        <p class="eyebrow">Library desk</p>
+        <h2>Reach the team</h2>
+        <ul class="plain-list">
+          <li>Email: library@yic.edu.sa</li>
+          <li>Phone: +966 14 123 4567</li>
+          <li>Location: Yanbu Industrial City, Saudi Arabia</li>
+          <li>Hours: Sunday to Thursday, 8:00 AM to 8:00 PM</li>
+        </ul>
+      </article>
+      <section class="info-card">
+        <p class="eyebrow">Support request</p>
+        <h2>Send a message</h2>
+        <form id="contactForm" class="stacked-form" novalidate>
+          <label class="field">
+            <span>Name</span>
+            <input type="text" name="name" required placeholder="Your name">
+            <small class="error-text"></small>
+          </label>
+          <label class="field">
+            <span>Email</span>
+            <input type="email" name="email" required placeholder="you@yic.edu.sa">
+            <small class="error-text"></small>
+          </label>
+          <label class="field">
+            <span>Message</span>
+            <textarea name="message" rows="5" required placeholder="How can we help?"></textarea>
+            <small class="error-text"></small>
+          </label>
+          <button type="submit" class="primary-btn">Send Message</button>
+        </form>
+        <p id="contactMessage" class="status-message" aria-live="polite"></p>
+      </section>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <p>© 2026 Book Hub | All Rights Reserved</p>
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

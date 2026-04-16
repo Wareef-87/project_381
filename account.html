@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YIC Library | My Account</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="account">
+  <header class="site-header">
+    <a href="home.html" class="brand-link" aria-label="Book Hub home page">
+      <span class="brand-name">Book Hub</span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="home.html">Home</a>
+      <a href="search.html">Search</a>
+      <a href="account.html" aria-current="page">My Account</a>
+      <a href="contact.html">Contact</a>
+      <a href="login.html" class="button-link">Log Out</a>
+    </nav>
+  </header>
+
+  <main class="page-shell">
+    <section class="section-shell account-overview">
+      <div class="section-heading">
+        <p class="eyebrow">Student dashboard</p>
+        <h2>Library activity at a glance</h2>
+      </div>
+      <div id="accountStats" class="account-stat-grid" aria-live="polite"></div>
+    </section>
+
+    <section class="section-shell">
+      <div class="section-heading">
+        <p class="eyebrow">Currently borrowed</p>
+        <h2>Books to return</h2>
+      </div>
+      <div id="currentBorrowings" class="card-stack" aria-live="polite"></div>
+    </section>
+
+    <section class="section-shell table-shell">
+      <div class="section-heading">
+        <p class="eyebrow">Borrowing history</p>
+        <h2>Completed and active transactions</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Book</th>
+              <th>Borrow Date</th>
+              <th>Due Date</th>
+              <th>Return Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="historyTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section-shell table-shell">
+      <div class="section-heading">
+        <p class="eyebrow">Fine tracking</p>
+        <h2>Late return penalties</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Book</th>
+              <th>Days Late</th>
+              <th>Fine Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="fineTable"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <p>© 2026 Book Hub | All Rights Reserved</p>
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

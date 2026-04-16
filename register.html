@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YIC Library | Register</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="register">
+  <header class="site-header">
+    <a href="home.html" class="brand-link" aria-label="Book Hub home page">
+      <span class="brand-name">Book Hub</span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="home.html">Home</a>
+      <a href="search.html">Search</a>
+      <a href="login.html">Login</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
+
+  <main class="page-shell auth-shell">
+    <section class="section-shell auth-card">
+      <div class="section-heading">
+        <p class="eyebrow">Student registration</p>
+        <h2>Sign up for library access</h2>
+      </div>
+      <form id="registerForm" class="stacked-form" novalidate>
+        <label class="field">
+          <span>Full name</span>
+          <input type="text" name="fullName" placeholder="Enter your full name" required>
+          <small class="error-text"></small>
+        </label>
+        <label class="field">
+          <span>Student ID</span>
+          <input type="text" name="studentId" placeholder="YIC2026001" required>
+          <small class="error-text"></small>
+        </label>
+        <label class="field">
+          <span>Email</span>
+          <input type="email" name="email" placeholder="student@yic.edu.sa" required>
+          <small class="error-text"></small>
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <input type="password" name="password" placeholder="At least 6 characters" required minlength="6">
+          <small class="error-text"></small>
+        </label>
+        <label class="field">
+          <span>Confirm password</span>
+          <input type="password" name="confirmPassword" placeholder="Re-enter password" required minlength="6">
+          <small class="error-text"></small>
+        </label>
+        <button type="submit" class="primary-btn">Create Account</button>
+      </form>
+      <p id="registerMessage" class="status-message" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <p>© 2026 Book Hub | All Rights Reserved</p>
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

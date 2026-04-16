@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YIC Library | Admin Panel</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-page="admin">
+  <header class="site-header">
+    <a href="../home.html" class="brand-link" aria-label="Book Hub home page">
+      <span class="brand-name">Book Hub</span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="../home.html">Home</a>
+      <a href="../search.html">Search</a>
+      <a href="../account.html">User View</a>
+      <a href="manage-books.html" aria-current="page">Manage Books</a>
+      <a href="../login.html" class="button-link">Log Out</a>
+    </nav>
+  </header>
+
+  <main class="page-shell">
+    <section class="section-shell two-column-grid">
+      <section class="info-card">
+        <div class="section-heading">
+          <p class="eyebrow">Catalog management</p>
+          <h2>Add or update a book</h2>
+        </div>
+        <form id="adminBookForm" class="stacked-form" novalidate>
+          <input type="hidden" name="bookId">
+          <label class="field">
+            <span>Title</span>
+            <input type="text" name="title" required placeholder="Book title">
+            <small class="error-text"></small>
+          </label>
+          <label class="field">
+            <span>Author</span>
+            <input type="text" name="author" required placeholder="Author name">
+            <small class="error-text"></small>
+          </label>
+          <label class="field">
+            <span>Category</span>
+            <input type="text" name="category" required placeholder="Category">
+            <small class="error-text"></small>
+          </label>
+          <label class="field">
+            <span>ISBN</span>
+            <input type="text" name="isbn" required placeholder="ISBN number">
+            <small class="error-text"></small>
+          </label>
+          <label class="field">
+            <span>Description</span>
+            <textarea name="description" rows="4" required placeholder="Short description"></textarea>
+            <small class="error-text"></small>
+          </label>
+          <div class="inline-actions">
+            <button type="submit" class="primary-btn">Save Book</button>
+            <button id="adminResetButton" type="button" class="ghost-btn">Clear</button>
+          </div>
+        </form>
+        <p id="adminMessage" class="status-message" aria-live="polite"></p>
+      </section>
+
+      <article class="info-card">
+        <div class="section-heading">
+          <p class="eyebrow">Overdue tracking</p>
+          <h2>Late returns and estimated fines</h2>
+        </div>
+        <div id="overdueCards" class="card-stack" aria-live="polite"></div>
+      </article>
+    </section>
+
+    <section class="section-shell table-shell">
+      <div class="section-heading">
+        <p class="eyebrow">Book inventory</p>
+        <h2>Current catalog overview</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Author</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminBookTable"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <p>© 2026 Book Hub | All Rights Reserved</p>
+  </footer>
+
+  <script src="../assets/js/app.js"></script>
+</body>
+</html>

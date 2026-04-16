@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title desc">
+  <title id="title">Book Hub Illustration</title>
+  <desc id="desc">An illustrated stack of books with warm library colors.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f3efe7"/>
+      <stop offset="100%" stop-color="#d9efe9"/>
+    </linearGradient>
+    <linearGradient id="cover1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f766e"/>
+      <stop offset="100%" stop-color="#115e59"/>
+    </linearGradient>
+    <linearGradient id="cover2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c2410c"/>
+      <stop offset="100%" stop-color="#9a3412"/>
+    </linearGradient>
+    <linearGradient id="cover3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1f2a36"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="600" rx="36" fill="url(#bg)"/>
+  <circle cx="655" cy="120" r="56" fill="#ffffff" opacity="0.55"/>
+  <circle cx="120" cy="140" r="32" fill="#0f766e" opacity="0.12"/>
+
+  <ellipse cx="410" cy="500" rx="210" ry="34" fill="#000000" opacity="0.08"/>
+
+  <g transform="translate(130 170)">
+    <rect x="36" y="170" width="410" height="70" rx="14" fill="url(#cover3)"/>
+    <rect x="54" y="128" width="390" height="62" rx="14" fill="url(#cover2)"/>
+    <rect x="10" y="78" width="420" height="70" rx="14" fill="url(#cover1)"/>
+
+    <rect x="62" y="186" width="70" height="12" rx="6" fill="#f3efe7" opacity="0.88"/>
+    <rect x="62" y="206" width="120" height="10" rx="5" fill="#f3efe7" opacity="0.6"/>
+
+    <rect x="80" y="145" width="88" height="12" rx="6" fill="#fff7ed" opacity="0.92"/>
+    <rect x="80" y="164" width="142" height="10" rx="5" fill="#fff7ed" opacity="0.6"/>
+
+    <rect x="46" y="97" width="94" height="12" rx="6" fill="#ecfeff" opacity="0.92"/>
+    <rect x="46" y="116" width="150" height="10" rx="5" fill="#ecfeff" opacity="0.62"/>
+  </g>
+
+  <g transform="translate(525 175)">
+    <rect x="0" y="108" width="120" height="150" rx="16" fill="#ffffff" opacity="0.55"/>
+    <path d="M24 60c0-38 30-68 68-68s68 30 68 68v148c0 11-9 20-20 20H44c-11 0-20-9-20-20V60z" fill="#fffdf8"/>
+    <path d="M48 72h70M48 98h86M48 124h76M48 150h92" stroke="#d6d3d1" stroke-width="10" stroke-linecap="round"/>
+    <rect x="48" y="184" width="64" height="18" rx="9" fill="#0f766e" opacity="0.85"/>
+  </g>
+</svg>
