@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YIC Library | Contact</title>
+  <title>Book Hub | Contact</title>
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
+
 <body data-page="contact">
   <header class="site-header">
-    <a href="index.html" class="brand-link" aria-label="Book Hub home page">
+    <!--the logo — links back to the homepage.-->
+    <a href="index.html" class="brand-link" >
       <span class="brand-name">Book Hub</span>
     </a>
+  
     <nav class="site-nav" aria-label="Main navigation">
       <a href="index.html">Home</a>
       <a href="search.html">Search</a>
@@ -32,28 +36,34 @@
           <li>Hours: Sunday to Thursday, 8:00 AM to 8:00 PM</li>
         </ul>
       </article>
+
       <section class="info-card">
         <p class="eyebrow">Support request</p>
         <h2>Send a message</h2>
         <form id="contactForm" class="stacked-form" novalidate>
+
           <label class="field">
             <span>Name</span>
             <input type="text" name="name" required placeholder="Your name">
             <small class="error-text"></small>
           </label>
+
           <label class="field">
             <span>Email</span>
             <input type="email" name="email" required placeholder="you@yic.edu.sa">
             <small class="error-text"></small>
           </label>
+
           <label class="field">
             <span>Message</span>
             <textarea name="message" rows="5" required placeholder="How can we help?"></textarea>
             <small class="error-text"></small>
           </label>
+
           <button type="submit" class="primary-btn">Send Message</button>
         </form>
-        <p id="contactMessage" class="status-message" aria-live="polite"></p>
+
+        <p id="contactMessage" class="status-message"></p>
       </section>
     </section>
   </main>

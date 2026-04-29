@@ -1,20 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title> Book Hub | Home</title>
+  <!--Remix Icon-->
   <link
   href="https://cdn.jsdelivr.net/npm/remixicon@4.9.0/fonts/remixicon.css"
   rel="stylesheet"
-/>
+ />
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
+
 <body data-page="home">
   <header class="site-header">
-    <a href="index.html" class="brand-link" aria-label="Book Hub home page">
+    <a href="index.html" class="brand-link">
       <span class="brand-name">Book Hub</span>
     </a>
+
     <nav class="site-nav" aria-label="Main navigation">
       <a href="index.html" aria-current="page">Home</a>
       <a href="search.html">Search</a>
@@ -22,6 +26,7 @@
       <a href="contact.html">Contact</a>
       <a href="login.html" class="button-link">Login</a>
     </nav>
+
   </header>
 
   <main class="page-shell">
@@ -33,10 +38,12 @@
           Discover a world full of stories, knowledge, and inspiration.
           Search, explore, and borrow your favorite books anytime, anywhere.
         </p>
-        <div class="hero-actions">
+
+        <div class="hero-actions"> <!--links-->
           <a class="primary-btn" href="search.html">Explore Books</a>
           <a class="secondary-btn" href="register.html">Create Account</a>
         </div>
+
       </div>
       <div class="hero-image">
         <img src="images/section.jpg" alt="Books Image">
@@ -45,23 +52,23 @@
 
     <section class="section-shell soft-panel">
       <div class="section-heading">
-        <p class="eyebrow">Books Types</p>
+        <p class="eyebrow"></p>
         <h2>Choose a type and explore the books you love</h2>
       </div>
-      <div id="categoryGrid" class="category-grid" aria-live="polite"></div>
+      <div id="categoryGrid" class="category-grid"></div>
     </section>
 
     <section class="section-shell soft-panel">
       <div class="section-heading">
         <p class="eyebrow">Featured collection</p>
-        <h2>Popular titles in small book cards</h2>
+        <h2>Popular titles</h2>
       </div>
-      <div id="featuredBooks" class="book-grid" aria-live="polite"></div>
+      <div id="featuredBooks" class="book-grid" ></div>
     </section>
   </main>
 
   <footer class="page-footer">
-    <p>آ© 2026 Book Hub | All Rights Reserved</p>
+    <p>© 2026 Book Hub | All Rights Reserved</p>
   </footer>
 
   <script src="assets/js/app.js"></script>

@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YIC Library | Login</title>
+  <title>Book Hub | Login</title>
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
+
 <body data-page="login">
   <header class="site-header">
-    <a href="index.html" class="brand-link" aria-label="Book Hub home page">
+    <a href="index.html" class="brand-link">
       <span class="brand-name">Book Hub</span>
     </a>
+
     <nav class="site-nav" aria-label="Main navigation">
       <a href="index.html">Home</a>
       <a href="search.html">Search</a>
@@ -22,33 +25,38 @@
   <main class="page-shell auth-shell">
     <section class="section-shell auth-card">
       <div class="section-heading">
-        <p class="eyebrow">Authentication</p>
+      
         <h2>Log in to continue</h2>
       </div>
+
       <form id="loginForm" class="stacked-form" novalidate>
         <label class="field">
           <span>Email</span>
-          <input type="email" name="email" placeholder="student@yic.edu.sa" required>
+          <input type="email" name="email" placeholder="example@gmail.com" required>
           <small class="error-text"></small>
         </label>
+
         <label class="field">
           <span>Password</span>
           <input type="password" name="password" placeholder="Enter your password" required minlength="6">
           <small class="error-text"></small>
         </label>
+
         <label class="field">
           <span>Role</span>
           <select name="role" required>
             <option value="">Choose role</option>
-            <option value="student">Student</option>
+            <option value="User">User</option>
             <option value="admin">Admin</option>
           </select>
+
           <small class="error-text"></small>
         </label>
         <button type="submit" class="primary-btn">Login</button>
       </form>
-      <p id="loginMessage" class="status-message" aria-live="polite"></p>
-      <p class="subtle-copy">New here? <a href="register.html">Create a student account</a>.</p>
+
+      <p id="loginMessage" class="status-message"></p>
+      <p class="subtle-copy">New here? <a href="register.html">Create an account!</a>.</p>
     </section>
   </main>
 

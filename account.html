@@ -1,33 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"> <!-- Starts the HTML document and sets the language to English (important for SEO and accessibility). -->
+
 <head>
 <!-- Bana was here -->
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YIC Library | My Account</title>
+  <meta charset="UTF-8"> <!--Allows all characters (including Arabic) to display correctly.-->
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!--Makes the page responsive on mobile devices.-->
+  <title>Book Hub | My Account</title>
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
+
 <body data-page="account">
+
   <header class="site-header">
-    <a href="index.html" class="brand-link" aria-label="Book Hub home page">
-      <span class="brand-name">Book Hub</span>
+
+    <a href="index.html" class="brand-link" >
+      <span class="brand-name">Book Hub</span> <!--Displays the website name.-->
     </a>
-    <nav class="site-nav" aria-label="Main navigation">
+    <nav class="site-nav" aria-label="Main navigation"> <!--Navigation menu with ARIA label for accessibility.-->
       <a href="index.html">Home</a>
       <a href="search.html">Search</a>
       <a href="account.html" aria-current="page">My Account</a>
       <a href="contact.html">Contact</a>
       <a href="login.html" class="button-link">Log Out</a>
     </nav>
+
   </header>
 
   <main class="page-shell">
     <section class="section-shell account-overview">
+      <!--Displays the sections name.-->
       <div class="section-heading">
         <p class="eyebrow">Student dashboard</p>
         <h2>Library activity at a glance</h2>
       </div>
-      <div id="accountStats" class="account-stat-grid" aria-live="polite"></div>
+      <div id="accountStats" class="account-stat-grid"></div> <!--grid (rows + columns)-->
     </section>
 
     <section class="section-shell">
@@ -35,7 +42,7 @@
         <p class="eyebrow">Currently borrowed</p>
         <h2>Books to return</h2>
       </div>
-      <div id="currentBorrowings" class="card-stack" aria-live="polite"></div>
+      <div id="currentBorrowings" class="card-stack" ></div> <!--card-stack-->
     </section>
 
     <section class="section-shell table-shell">
@@ -84,6 +91,6 @@
     <p>© 2026 Book Hub | All Rights Reserved</p>
   </footer>
 
-  <script src="assets/js/app.js"></script>
+  <script src="assets/js/app.js"></script> <!--links an external JavaScript file to the HTML page-->
 </body>
 </html>

@@ -1,6 +1,6 @@
 (function () {
   const STORAGE_KEY = "yic-library-state";
-  const DAY_MS = 24 * 60 * 60 * 1000;
+  const DAY_MS = 24 * 60 * 60 * 1000; // Calculates milliseconds in a full day (24h * 60m * 60s * 1000ms)
 
   const seedState = {
     books: [
@@ -9,7 +9,6 @@
         title: "Instruction in Functional Assessment",
         author: "Robert C. Martin",
         category: "Educational",
-        isbn: "9780132350884",
         year: 2008,
         description: "nstruction in Functional Assessment introduces learners to functional assessment (FA).",
         featured: true,
@@ -20,7 +19,6 @@
         title: "The body keeps the score",
         author: "Bessel van der Kolk",
         category: "Psychology",
-        isbn: "9780262046305",
         year: 2022,
         description: "explores how trauma reshapes both body and brain, limiting survivors' capacities for pleasure, engagement, and self-contro.",
         featured: true,
@@ -31,7 +29,6 @@
         title: "Come Closer",
         author: "Sara Gran",
         category: "Horror",
-        isbn: "9781118061145",
         year: 2003,
         description: "Amanda is life unravels as strange events push her into violent impulses and haunting blood‑red dreams.",
         featured: true,
@@ -42,7 +39,6 @@
         title: "Mrs England",
         author: "Stacey Halls",
         category: "Adventure",
-        isbn: "9780831133276",
         year: 2013,
         description: "Mrs England follows nurse Ruby May as she uncovers the dark secrets of a wealthy family and their unsettling mistress in an isolated Yorkshire home.",
         featured: false,
@@ -53,7 +49,6 @@
         title: "Ikigai",
         author: "Héctor García",
         category: "Psychology",
-        isbn: "9781118347232",
         year: 2017,
         description: "The book shows how the Japanese idea of *ikigai* offers simple, calming guidance for finding purpose in everyday life.",
         featured: false,
@@ -64,20 +59,21 @@
         title: "Ibn Saud",
         author: "Professor Barbara Bray",
         category: "Historical",
-        isbn: "9781319245009",
         year: 2015,
         description: "Ibn Saud rose from a harsh nomadic desert life to become a fearless warrior and decisive leader.",
         featured: true,
         cover: "images/books/book6.png"
       }
     ],
+
+    // information about the user  might delete.
     users: [
       {
         id: 1,
-        name: "Demo Student",
-        email: "student@yic.edu.sa",
-        role: "student",
-        studentId: "YIC2026001"
+        name: "Demo User",
+        email: "example@gmail.com",
+        role: "User",
+        
       }
     ],
     borrowings: [
@@ -99,7 +95,7 @@
       }
     ]
   };
-
+// (index page)The categoryMeta array provides a icon display information about book categories
   const categoryMeta = [
     {
       name: "Educational",
@@ -127,6 +123,7 @@
       icon: "ri-ancient-gate-line"
     }
   ];
+// The pageMap object serves as a reference for the different pages of the application.
 
   const pageMap = {
     home: "index.html",
@@ -138,11 +135,11 @@
     contact: "contact.html",
     admin: "admin/manage-books.html"
   };
-
+ // The deepClone function creates a deep copy of a given value using JSON serialization and deserialization. This is useful for creating independent copies of objects or arrays without reference to the original.
   function deepClone(value) {
     return JSON.parse(JSON.stringify(value));
   }
-
+// The normalizeState function takes a state object and ensures that it has a consistent structure by filling in any missing properties with default values from the seedState. It also adds cover images for books if they are not provided, using a fallback naming convention based on the book's ID.
   function normalizeState(state) {
     const defaultBooks = seedState.books;
     const normalizedBooks = (state.books || []).map((book) => {
@@ -160,7 +157,7 @@
         cover: fallback.cover || book.cover || `images/books/book${book.id}.png`
       };
     });
-
+// This part of the normalizeState function identifies any books that are present in the defaultBooks array but missing from the normalizedBooks array. It then creates new book objects for these missing books, ensuring they have all necessary properties and a cover image, before adding them to the final state.
     const additionalBooks = defaultBooks
       .filter((seedBook) => !normalizedBooks.some((book) => book.id === seedBook.id))
       .map((seedBook) => ({
@@ -173,7 +170,7 @@
       books: [...normalizedBooks, ...additionalBooks]
     };
   }
-
+// The loadState function attempts to retrieve the application's state from the browser's localStorage. If no saved state is found, it initializes the storage with a deep clone of the seedState. If a saved state is found, it parses the JSON string and normalizes it before returning. In case of any errors during this process (e.g., corrupted data), it falls back to returning a deep clone of the seedState.
   function loadState() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -186,11 +183,11 @@
       return deepClone(seedState);
     }
   }
-
+// The saveState function takes a state object as an argument and saves it to the browser's localStorage under the key defined by STORAGE_KEY. It converts the state object into a JSON string before storing it, allowing for persistent data storage across page reloads.
   function saveState(state) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
-
+// might delete innput information
   function getCurrentDate() {
     return "2026-04-15";
   }
@@ -205,7 +202,7 @@
       year: "numeric"
     });
   }
-
+// The getOpenBorrowing function checks the borrowings in the state to find an active borrowing entry for a specific book ID. It returns the borrowing entry if it exists and has not been returned (i.e., returnDate is null), or undefined if there is no active borrowing for that book.
   function getOpenBorrowing(state, bookId) {
     return state.borrowings.find((entry) => entry.bookId === bookId && !entry.returnDate);
   }
@@ -226,7 +223,7 @@
       amount: daysLate * 5
     };
   }
-
+// The getBookById function searches through the books in the state to find a book that matches the provided bookId. It returns the book object if found, or undefined if no matching book is present in the state.
   function getBookById(state, bookId) {
     return state.books.find((book) => Number(book.id) === Number(bookId));
   }
@@ -236,7 +233,7 @@
     if (getBookStatus(state, bookId) !== "available") {
       return false;
     }
-
+// The borrowBook function first loads the current state and checks if the specified book is available for borrowing. If the book is not available, it returns false. If the book is available, it calculates the next borrowing ID by finding the maximum existing borrowing ID and adding one. It then creates a new borrowing entry with the current date as the borrow date and a due date set 14 days in the future. This new entry is added to the state's borrowings array, and the updated state is saved back to localStorage before returning true to indicate a successful borrowing action.
     const nextId = Math.max(0, ...state.borrowings.map((item) => item.id)) + 1;
     const borrowDate = getCurrentDate();
     const due = new Date(`${borrowDate}T00:00:00`);
@@ -254,7 +251,7 @@
     saveState(state);
     return true;
   }
-
+// The returnBook function allows a user to return a borrowed book by updating the corresponding borrowing entry in the state. It first loads the current state and finds the borrowing entry that matches the provided borrowingId. If no such entry exists or if the book has already been returned (i.e., returnDate is not null), the function simply returns without making any changes. If the borrowing entry is valid and active, it sets the returnDate to the current date, saves the updated state back to localStorage, and effectively marks the book as returned.
   function returnBook(borrowingId) {
     const state = loadState();
     const borrowing = state.borrowings.find((item) => Number(item.id) === Number(borrowingId));
@@ -264,7 +261,7 @@
     borrowing.returnDate = getCurrentDate();
     saveState(state);
   }
-
+//  The deleteBook function attempts to remove a book from the catalog based on the provided bookId. It first loads the current state and checks if there is an active borrowing for the specified book using the getOpenBorrowing function. If there is an active borrowing, it returns false, indicating that the book cannot be deleted while it is currently borrowed. If there are no active borrowings for the book, it filters out the book from the state's books array, saves the updated state back to localStorage, and returns true to indicate that the book was successfully deleted from the catalog.
   function deleteBook(bookId) {
     const state = loadState();
     if (getOpenBorrowing(state, bookId)) {
@@ -274,7 +271,7 @@
     saveState(state);
     return true;
   }
-
+// The upsertBook is responsible for adding a new book to the catalog or updating an existing book's information based on the provided bookData object. It first loads the current state and checks if the bookData contains an id property. If it does, it attempts to find a matching book in the state by comparing the IDs. If a match is found, it updates the existing book's properties with the new data from bookData while ensuring that the ID remains consistent. If no match is found (i.e., it's a new book), it calculates the next available ID by finding the maximum existing book ID and adding one, then adds a new book object to the state's books array with default values for featured and year if they are not provided. Finally, it saves the updated state back to localStorage.
   function upsertBook(bookData) {
     const state = loadState();
     if (bookData.id) {
@@ -288,16 +285,16 @@
     }
     saveState(state);
   }
-
+//
   function getQueryParam(name) {
     return new URLSearchParams(window.location.search).get(name);
   }
-
+// The createStatusMarkup function generates HTML markup for displaying the status of a book (e.g., available, borrowed, overdue)
   function createStatusMarkup(status) {
     const label = status.charAt(0).toUpperCase() + status.slice(1);
     return `<span class="status-pill status-${status}">${label}</span>`;
   }
-
+// The attachBorrowListeners function adds click event listeners to all elements within the specified scope that have a data-borrow attribute. When a borrow button is clicked, it attempts to borrow the corresponding book using the borrowBook function. If the borrowing is successful, it displays an alert confirming the action and reloads the page to reflect the updated state. If the book is unavailable for borrowing, it shows an alert indicating that the book cannot be borrowed at the moment.
   function attachBorrowListeners(scope) {
     scope.querySelectorAll("[data-borrow]").forEach((button) => {
       button.addEventListener("click", () => {
@@ -311,7 +308,7 @@
       });
     });
   }
-
+// The attachReturnListeners function adds click event listeners to all elements within the specified scope that have a data-return attribute. When a return button is clicked, it calls the returnBook function with the corresponding borrowing ID to mark the book as returned, and then reloads the page to update the account information and reflect the change in book status.
   function attachReturnListeners(scope) {
     scope.querySelectorAll("[data-return]").forEach((button) => {
       button.addEventListener("click", () => {
@@ -320,7 +317,7 @@
       });
     });
   }
-
+// The renderBookCard function generates the HTML markup for displaying a single book card, including its cover, title, author, and status.
   function renderBookCard(state, book) {
     const status = getBookStatus(state, book.id);
     return `
@@ -345,7 +342,7 @@
       </article>
     `;
   }
-
+// The renderHomePage function is responsible for rendering the content of the home page, including the category grid and featured books section. It loads the current state, generates the HTML markup for each category and featured book, and attaches event listeners to the category buttons for navigation and to the borrow buttons for borrowing books.
   function renderHomePage() {
     const state = loadState();
     const categoryGrid = document.getElementById("categoryGrid");
@@ -367,7 +364,7 @@
           <button type="button" class="secondary-btn" data-category-link="${category.name}">View Books</button>
         </article>
       `).join("");
-
+// This part of the renderHomePage function adds click event listeners to each category button in the category grid. When a button is clicked, it constructs a new URL for the search page with a query parameter for the selected category, and then navigates the browser to that URL, allowing users to view books filtered by the chosen category.
       categoryGrid.querySelectorAll("[data-category-link]").forEach((button) => {
         button.addEventListener("click", () => {
           const url = new URL(pageMap.search, window.location.href);
@@ -376,7 +373,7 @@
         });
       });
     }
-
+// This part of the renderHomePage function checks if the featuredBooks element exists and, if it does, generates the HTML markup for each featured book by filtering the books in the state for those marked as featured and using the renderBookCard function to create the markup for each book. It then sets the innerHTML of the featuredBooks element to this generated markup and attaches borrow listeners to enable borrowing functionality for the featured books.
     if (featuredBooks) {
       featuredBooks.innerHTML = state.books
         .filter((book) => book.featured)
@@ -385,7 +382,7 @@
       attachBorrowListeners(featuredBooks);
     }
   }
-
+// The renderSearchPage function is responsible for rendering the search page, including the search form, category filter, and search results. It loads the current state, populates the category select dropdown, and sets up event listeners for the search form submission to filter and display books based on the search criteria entered by the user.
   function renderSearchPage() {
     const state = loadState();
     const form = document.getElementById("searchForm");
@@ -397,7 +394,7 @@
     if (!form || !categorySelect || !results || !summary) {
       return;
     }
-
+// Populate the category select dropdown with available categories
     categoryMeta.forEach((item) => {
       const option = document.createElement("option");
       option.value = item.name;
@@ -405,7 +402,7 @@
       categorySelect.appendChild(option);
     });
     categorySelect.value = queryCategory;
-
+// The updateResults function is responsible for filtering the books based on the search keyword and selected category, updating the search summary with the number of results found, and rendering the filtered books in the search results section. It also attaches borrow listeners to the rendered book cards to enable borrowing functionality directly from the search results.
     const updateResults = () => {
       const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
       const category = categorySelect.value;
@@ -421,7 +418,7 @@
       results.innerHTML = filtered.map((book) => renderBookCard(state, book)).join("");
       attachBorrowListeners(results);
     };
-
+// Set up event listener for the search form submission
     form.addEventListener("submit", (event) => {
       event.preventDefault();
       updateResults();
@@ -429,7 +426,7 @@
 
     updateResults();
   }
-
+// The renderDetailsPage function is responsible for rendering the details page for a specific book. It loads the current state, retrieves the book ID from the query parameters, and finds the corresponding book in the state. If the book is found, it generates the HTML markup to display the book's details, including its title, author, description, and status. It also attaches event listeners to the borrow button if the book is available for borrowing.
   function renderDetailsPage() {
     const state = loadState();
     const container = document.getElementById("bookDetails");
@@ -443,7 +440,7 @@
       container.innerHTML = "<p>Book not found.</p>";
       return;
     }
-
+// This generates the HTML markup for the book details page, including the book's category, title,... and a list of details such as ISBN and publication year. It also includes a status indicator and buttons for borrowing the book or returning to the search page. The borrow button is conditionally rendered based on the availability of the book, and event listeners are attached to enable borrowing functionality.
     const status = getBookStatus(state, book.id);
     container.innerHTML = `
       <div class="details-layout">
@@ -476,7 +473,7 @@
 
     attachBorrowListeners(container);
   }
-
+// The renderAccountPage function is responsible for rendering the user's account page, which includes sections for current borrowings, borrowing history, and fines. It loads the current state, retrieves the user's borrowing records, and generates the HTML markup to display active borrowings, historical records, and any fines associated with overdue books. It also attaches event listeners to enable returning books directly from the account page.
   function renderAccountPage() {
     const state = loadState();
     const currentBorrowings = document.getElementById("currentBorrowings");
@@ -486,7 +483,7 @@
     if (!currentBorrowings || !historyTable || !fineTable || !stats) {
       return;
     }
-
+// This part of the renderAccountPage function filters the borrowings in the state to find those that belong to the current user (userId: 1) and sorts them by borrow date in descending order. It then separates active borrowings (those without a return date) from historical records and calculates any fines for overdue books. The account statistics are updated to show the number of active borrowings, total records, fine entries, and outstanding fine value. The current borrowings, borrowing history, and fines are rendered in their respective sections of the account page.
     const borrowings = state.borrowings
       .filter((item) => item.userId === 1)
       .sort((a, b) => new Date(b.borrowDate) - new Date(a.borrowDate));
@@ -502,7 +499,7 @@
       <article class="account-stat"><strong>${fines.length}</strong><span class="muted-label">Fine Entries</span></article>
       <article class="account-stat"><strong>${fines.reduce((sum, entry) => sum + entry.fine.amount, 0)} SAR</strong><span class="muted-label">Outstanding Value</span></article>
     `;
-
+//  is populated with active borrowings, displaying the book's category, title, borrow date, due date, and status. If there are no active borrowings, a message is shown indicating that there are no currently borrowed books. The borrowing history table is filled with all borrowing records, showing the book title, borrow date, due date, return date, and status. The fines table lists any overdue borrowings along with the number of days late and the fine amount. Event listeners are attached to the return buttons to allow users to return books directly from their account page.
     currentBorrowings.innerHTML = active.length
       ? active.map((entry) => {
           const book = getBookById(state, entry.bookId);
@@ -520,7 +517,7 @@
           `;
         }).join("")
       : "<p>No active borrowed books at the moment.</p>";
-
+//  filled with all borrowing records, showing the book title, borrow date, due date, return date, and status. The fines table lists any overdue borrowings along with the number of days late and the fine amount. Event listeners are attached to the return buttons to allow users to return books directly from their account page.
     historyTable.innerHTML = borrowings.map((entry) => {
       const book = getBookById(state, entry.bookId);
       const status = entry.returnDate ? "returned" : getBookStatus(state, entry.bookId);
@@ -534,7 +531,7 @@
         </tr>
       `;
     }).join("");
-
+// The fines table lists any overdue borrowings along with the number of days late and the fine amount. Event listeners are attached to the return buttons to allow users to return books directly from their account page.
     fineTable.innerHTML = fines.length
       ? fines.map(({ item, fine }) => {
           const book = getBookById(state, item.bookId);
@@ -552,7 +549,7 @@
 
     attachReturnListeners(currentBorrowings);
   }
-
+//  This function sets an error message for a form field and updates its visual state.
   function setFormError(field, message) {
     const wrapper = field.closest(".field");
     const errorText = wrapper ? wrapper.querySelector(".error-text") : null;
@@ -562,14 +559,14 @@
     wrapper.classList.toggle("invalid", Boolean(message));
     errorText.textContent = message || "";
   }
-
+// The clearFormErrors function removes any error messages and visual error indicators from all form fields within the specified form element, resetting the form's error state to allow for fresh validation.
   function clearFormErrors(form) {
     form.querySelectorAll(".field").forEach((field) => field.classList.remove("invalid"));
     form.querySelectorAll(".error-text").forEach((item) => {
       item.textContent = "";
     });
   }
-
+// The validateRequired function 
   function validateRequired(field, label) {
     if (!field.value.trim()) {
       setFormError(field, `${label} is required.`);
@@ -578,7 +575,7 @@
     setFormError(field, "");
     return true;
   }
-
+// The validateRequired function
   function validateEmail(field) {
     if (!validateRequired(field, "Email")) {
       return false;
@@ -587,14 +584,14 @@
     setFormError(field, valid ? "" : "Enter a valid email address.");
     return valid;
   }
-
+//  responsible for rendering the login page and handling the login form submission. It validates the user or admin input.
   function renderLoginPage() {
     const form = document.getElementById("loginForm");
     const message = document.getElementById("loginMessage");
     if (!form || !message) {
       return;
     }
-
+//  adds a submit event listener to the login form. 
     form.addEventListener("submit", (event) => {
       event.preventDefault();
       clearFormErrors(form);
@@ -613,7 +610,7 @@
         message.textContent = "Please correct the highlighted fields.";
         return;
       }
-
+//  In this demo, any email/password combination is accepted for both user and admin roles. The message is updated to indicate a successful login, and after a short delay, the user is redirected to the appropriate page based on their selected role (admin panel for admins and account page for regular users).
       message.textContent = role.value === "admin"
         ? "Login successful. Redirecting to the admin panel..."
         : "Login successful. Redirecting to your account...";
@@ -623,21 +620,20 @@
       }, 900);
     });
   }
-
+//  is responsible for rendering the registration page and handling the registration form submission. It validates the user input for creating a new account, including checking for required fields, validating the email format, and ensuring that the password and confirm password fields match. If the validation passes, it displays a success message and redirects the user to the login page after a short delay.
   function renderRegisterPage() {
     const form = document.getElementById("registerForm");
     const message = document.getElementById("registerMessage");
     if (!form || !message) {
       return;
     }
-
+// adds a submit event listener to the registration form.
     form.addEventListener("submit", (event) => {
       event.preventDefault();
       clearFormErrors(form);
 
       const valid = [
         validateRequired(form.elements.fullName, "Full name"),
-        validateRequired(form.elements.studentId, "Student ID"),
         validateEmail(form.elements.email),
         validateRequired(form.elements.password, "Password"),
         validateRequired(form.elements.confirmPassword, "Confirm password")
@@ -660,7 +656,7 @@
       }, 900);
     });
   }
-
+//  responsible for rendering the contact page and handling the contact form submission. 
   function renderContactPage() {
     const form = document.getElementById("contactForm");
     const message = document.getElementById("contactMessage");
@@ -687,7 +683,7 @@
       form.reset();
     });
   }
-
+// 
   function fillAdminForm(book) {
     const form = document.getElementById("adminBookForm");
     if (!form || !book) {
@@ -700,7 +696,7 @@
     form.elements.isbn.value = book.isbn;
     form.elements.description.value = book.description;
   }
-
+//
   function renderAdminPage() {
     const table = document.getElementById("adminBookTable");
     const overdueCards = document.getElementById("overdueCards");
@@ -711,7 +707,7 @@
     if (!table || !overdueCards || !form || !message || !resetButton) {
       return;
     }
-
+//  responsible for rendering the admin page, including the book management table and the overdue items section. 
     const draw = () => {
       const currentState = loadState();
       table.innerHTML = currentState.books.map((book) => {
@@ -748,7 +744,7 @@
             `;
           }).join("")
         : "<p>No overdue items right now.</p>";
-
+// This part of the renderAdminPage function adds click event listeners to the edit and delete buttons in the book management table. 
       table.querySelectorAll("[data-edit-book]").forEach((button) => {
         button.addEventListener("click", () => {
           const book = getBookById(loadState(), Number(button.dataset.editBook));
@@ -771,7 +767,7 @@
     form.addEventListener("submit", (event) => {
       event.preventDefault();
       clearFormErrors(form);
-
+// add valid for book
       const valid = [
         validateRequired(form.elements.title, "Title"),
         validateRequired(form.elements.author, "Author"),
@@ -806,7 +802,7 @@
 
     draw();
   }
-
+// The init function determines which page is currently being viewed by checking the data-page attribute on the body element.
   function init() {
     const page = document.body.dataset.page;
     const handlers = {

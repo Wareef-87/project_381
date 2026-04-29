@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YIC Library | Admin Panel</title>
+  <title>Book Hub | Admin Panel</title>
   <link rel="stylesheet" href="../assets/css/style.css">
 </head>
+
 <body data-page="admin">
   <header class="site-header">
     <a href="../index.html" class="brand-link" aria-label="Book Hub home page">
@@ -27,6 +29,7 @@
           <p class="eyebrow">Catalog management</p>
           <h2>Add or update a book</h2>
         </div>
+
         <form id="adminBookForm" class="stacked-form" novalidate>
           <input type="hidden" name="bookId">
           <label class="field">
@@ -34,32 +37,38 @@
             <input type="text" name="title" required placeholder="Book title">
             <small class="error-text"></small>
           </label>
+
           <label class="field">
             <span>Author</span>
             <input type="text" name="author" required placeholder="Author name">
             <small class="error-text"></small>
           </label>
+
           <label class="field">
             <span>Category</span>
             <input type="text" name="category" required placeholder="Category">
             <small class="error-text"></small>
           </label>
+
           <label class="field">
             <span>ISBN</span>
             <input type="text" name="isbn" required placeholder="ISBN number">
             <small class="error-text"></small>
           </label>
+
           <label class="field">
             <span>Description</span>
             <textarea name="description" rows="4" required placeholder="Short description"></textarea>
             <small class="error-text"></small>
           </label>
+
           <div class="inline-actions">
             <button type="submit" class="primary-btn">Save Book</button>
             <button id="adminResetButton" type="button" class="ghost-btn">Clear</button>
           </div>
+
         </form>
-        <p id="adminMessage" class="status-message" aria-live="polite"></p>
+        <p id="adminMessage" class="status-message"></p>
       </section>
 
       <article class="info-card">
@@ -67,7 +76,7 @@
           <p class="eyebrow">Overdue tracking</p>
           <h2>Late returns and estimated fines</h2>
         </div>
-        <div id="overdueCards" class="card-stack" aria-live="polite"></div>
+        <div id="overdueCards" class="card-stack"></div>
       </article>
     </section>
 
@@ -76,6 +85,7 @@
         <p class="eyebrow">Book inventory</p>
         <h2>Current catalog overview</h2>
       </div>
+
       <div class="table-wrap">
         <table>
           <thead>
