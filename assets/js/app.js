@@ -2,6 +2,7 @@
   const STORAGE_KEY = "book-hub-state";
   const AUTH_KEY = "book-hub-auth";
   const DAY_MS = 24 * 60 * 60 * 1000; // Calculates milliseconds in a full day (24h * 60m * 60s * 1000ms)
+  const PLACEHOLDER_COVER = "images/books/placeholder-book.svg";
 
   const seedState = {
     books: [
@@ -140,14 +141,20 @@
   function deepClone(value) {
     return JSON.parse(JSON.stringify(value));
   }
+
+  function getDefaultBook(bookId) {
+    return seedState.books.find((book) => Number(book.id) === Number(bookId)) || {};
+  }
+
+  function getBookCover(book) {
+    return book.cover || `images/books/book${book.id}.png`;
+  }
 // The normalizeState function takes a state object and ensures that it has a consistent structure by filling in any missing properties with default values from the seedState. It also adds cover images for books if they are not provided, using a fallback naming convention based on the book's ID.
   function normalizeState(state) {
-    const defaultBooks = seedState.books;
-    const normalizedBooks = (state.books || []).map((book) => {
-      const fallback = defaultBooks.find((item) => item.id === book.id) || {};
+    const books = (state.books || []).map((book) => {
+      const fallback = getDefaultBook(book.id);
       return {
         ...book,
-        id: book.id,
         title: fallback.title || book.title,
         author: fallback.author || book.author,
         category: fallback.category || book.category,
@@ -155,34 +162,37 @@
         year: fallback.year || book.year,
         description: fallback.description || book.description,
         featured: typeof fallback.featured === "boolean" ? fallback.featured : book.featured,
-        cover: fallback.cover || book.cover || `images/books/book${book.id}.png`
+        cover: fallback.cover || getBookCover(book)
       };
     });
 // This part of the normalizeState function identifies any books that are present in the defaultBooks array but missing from the normalizedBooks array. It then creates new book objects for these missing books, ensuring they have all necessary properties and a cover image, before adding them to the final state.
-    const additionalBooks = defaultBooks
-      .filter((seedBook) => !normalizedBooks.some((book) => book.id === seedBook.id))
-      .map((seedBook) => ({
-        ...seedBook,
-        cover: seedBook.cover || `images/books/book${seedBook.id}.png`
-      }));
+    const missingBooks = seedState.books
+      .filter((seedBook) => !books.some((book) => Number(book.id) === Number(seedBook.id)))
+      .map((seedBook) => ({ ...seedBook, cover: getBookCover(seedBook) }));
 
     return {
       ...state,
-      books: [...normalizedBooks, ...additionalBooks]
+      books: [...books, ...missingBooks]
     };
+  }
+
+  function readStorage(key, fallback) {
+    try {
+      const saved = localStorage.getItem(key);
+      return saved ? JSON.parse(saved) : fallback;
+    } catch (error) {
+      return fallback;
+    }
   }
 // The loadState function attempts to retrieve the application's state from the browser's localStorage. If no saved state is found, it initializes the storage with a deep clone of the seedState. If a saved state is found, it parses the JSON string and normalizes it before returning. In case of any errors during this process (e.g., corrupted data), it falls back to returning a deep clone of the seedState.
   function loadState() {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(seedState));
-        return deepClone(seedState);
-      }
-      return normalizeState(JSON.parse(saved));
-    } catch (error) {
-      return deepClone(seedState);
+    const saved = readStorage(STORAGE_KEY, null);
+    if (!saved) {
+      const freshState = deepClone(seedState);
+      saveState(freshState);
+      return freshState;
     }
+    return normalizeState(saved);
   }
 // The saveState function takes a state object as an argument and saves it to the browser's localStorage under the key defined by STORAGE_KEY. It converts the state object into a JSON string before storing it, allowing for persistent data storage across page reloads.
   function saveState(state) {
@@ -190,12 +200,7 @@
   }
 
   function getAuthState() {
-    try {
-      const saved = localStorage.getItem(AUTH_KEY);
-      return saved ? JSON.parse(saved) : null;
-    } catch (error) {
-      return null;
-    }
+    return readStorage(AUTH_KEY, null);
   }
 
   function setAuthState(authState) {
@@ -206,32 +211,34 @@
     localStorage.removeItem(AUTH_KEY);
   }
 
-  function updateAuthNavigation() {
-    const authState = getAuthState();
-    const accountLinks = document.querySelectorAll('[data-auth-link="account"]');
-    const adminLinks = document.querySelectorAll('[data-auth-link="admin"]');
-    const loginLinks = document.querySelectorAll('[data-auth-link="login"]');
-    const logoutLinks = document.querySelectorAll('[data-auth-link="logout"]');
-    const isAdmin = authState && authState.role === "admin";
-
-    accountLinks.forEach((link) => {
-      link.style.display = authState && !isAdmin ? "inline-flex" : "none";
+  function toggleAuthLinks(selector, isVisible) {
+    document.querySelectorAll(selector).forEach((link) => {
+      link.style.display = isVisible ? "inline-flex" : "none";
     });
+  }
 
-    adminLinks.forEach((link) => {
-      link.style.display = isAdmin ? "inline-flex" : "none";
-    });
-
-    loginLinks.forEach((link) => {
-      link.style.display = authState ? "none" : "inline-flex";
-    });
-
-    logoutLinks.forEach((link) => {
-      link.style.display = authState ? "inline-flex" : "none";
+  function bindLogoutLinks() {
+    document.querySelectorAll('[data-auth-link="logout"]').forEach((link) => {
+      link.style.display = "inline-flex";
+      if (link.dataset.logoutBound) {
+        return;
+      }
+      link.dataset.logoutBound = "true";
       link.addEventListener("click", () => {
         clearAuthState();
       });
     });
+  }
+
+  function updateAuthNavigation() {
+    const authState = getAuthState();
+    const isAdmin = authState && authState.role === "admin";
+
+    toggleAuthLinks('[data-auth-link="account"]', Boolean(authState && !isAdmin));
+    toggleAuthLinks('[data-auth-link="admin"]', Boolean(isAdmin));
+    toggleAuthLinks('[data-auth-link="login"]', !authState);
+    toggleAuthLinks('[data-auth-link="logout"]', Boolean(authState));
+    bindLogoutLinks();
   }
 // might delete innput information
   function getCurrentDate() {
@@ -239,18 +246,17 @@
   }
 
   function formatDate(dateString) {
-    if (!dateString) {
-      return "Not returned";
-    }
-    return new Date(`${dateString}T00:00:00`).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric"
-    });
+    return dateString
+      ? new Date(`${dateString}T00:00:00`).toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric"
+        })
+      : "Not returned";
   }
 // The getOpenBorrowing function checks the borrowings in the state to find an active borrowing entry for a specific book ID. It returns the borrowing entry if it exists and has not been returned (i.e., returnDate is null), or undefined if there is no active borrowing for that book.
   function getOpenBorrowing(state, bookId) {
-    return state.borrowings.find((entry) => entry.bookId === bookId && !entry.returnDate);
+    return state.borrowings.find((entry) => Number(entry.bookId) === Number(bookId) && !entry.returnDate);
   }
 
   function getBookStatus(state, bookId) {
@@ -274,23 +280,83 @@
     return state.books.find((book) => Number(book.id) === Number(bookId));
   }
 
+  function getNextId(items) {
+    return Math.max(0, ...items.map((item) => Number(item.id) || 0)) + 1;
+  }
+
+  function getDueDateFromBorrowDate(borrowDate) {
+    const dueDate = new Date(`${borrowDate}T00:00:00`);
+    dueDate.setDate(dueDate.getDate() + 14);
+    return dueDate.toISOString().slice(0, 10);
+  }
+
+  function updateState(mutator) {
+    const state = loadState();
+    mutator(state);
+    saveState(state);
+    return state;
+  }
+
+  function reloadPage() {
+    window.location.reload();
+  }
+
+  function setRedirect(url) {
+    window.location.href = url;
+  }
+
+  function findByData(scope, attribute) {
+    return scope.querySelectorAll(`[${attribute}]`);
+  }
+
+  function bindDataAction(scope, attribute, handler) {
+    findByData(scope, attribute).forEach((element) => {
+      element.addEventListener("click", () => {
+        handler(element);
+      });
+    });
+  }
+
+  function setContent(element, content) {
+    element.innerHTML = content;
+  }
+
+  function joinMarkup(items) {
+    return items.join("");
+  }
+
+  function getStatusLabel(status) {
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  }
+
+  function getBookImageMarkup(book) {
+    return `
+      <img
+        src="${book.cover || PLACEHOLDER_COVER}"
+        alt="${book.title} book cover"
+        onerror="this.onerror=null;this.src='${PLACEHOLDER_COVER}';"
+      >
+    `;
+  }
+
+  function renderEmptyRow(message, columns) {
+    return `<tr><td colspan="${columns}">${message}</td></tr>`;
+  }
+// The borrowBook function first loads the current state and checks if the specified book is available for borrowing. If the book is not available, it returns false. If the book is available, it calculates the next borrowing ID by finding the maximum existing borrowing ID and adding one. It then creates a new borrowing entry with the current date as the borrow date and a due date set 14 days in the future. This new entry is added to the state's borrowings array, and the updated state is saved back to localStorage before returning true to indicate a successful borrowing action.
   function borrowBook(bookId) {
     const state = loadState();
     if (getBookStatus(state, bookId) !== "available") {
       return false;
     }
-// The borrowBook function first loads the current state and checks if the specified book is available for borrowing. If the book is not available, it returns false. If the book is available, it calculates the next borrowing ID by finding the maximum existing borrowing ID and adding one. It then creates a new borrowing entry with the current date as the borrow date and a due date set 14 days in the future. This new entry is added to the state's borrowings array, and the updated state is saved back to localStorage before returning true to indicate a successful borrowing action.
-    const nextId = Math.max(0, ...state.borrowings.map((item) => item.id)) + 1;
+
     const borrowDate = getCurrentDate();
-    const due = new Date(`${borrowDate}T00:00:00`);
-    due.setDate(due.getDate() + 14);
 
     state.borrowings.push({
-      id: nextId,
+      id: getNextId(state.borrowings),
       userId: 1,
       bookId,
       borrowDate,
-      dueDate: due.toISOString().slice(0, 10),
+      dueDate: getDueDateFromBorrowDate(borrowDate),
       returnDate: null
     });
 
@@ -299,13 +365,13 @@
   }
 // The returnBook function allows a user to return a borrowed book by updating the corresponding borrowing entry in the state. It first loads the current state and finds the borrowing entry that matches the provided borrowingId. If no such entry exists or if the book has already been returned (i.e., returnDate is not null), the function simply returns without making any changes. If the borrowing entry is valid and active, it sets the returnDate to the current date, saves the updated state back to localStorage, and effectively marks the book as returned.
   function returnBook(borrowingId) {
-    const state = loadState();
-    const borrowing = state.borrowings.find((item) => Number(item.id) === Number(borrowingId));
-    if (!borrowing || borrowing.returnDate) {
-      return;
-    }
-    borrowing.returnDate = getCurrentDate();
-    saveState(state);
+    updateState((state) => {
+      const borrowing = state.borrowings.find((item) => Number(item.id) === Number(borrowingId));
+      if (!borrowing || borrowing.returnDate) {
+        return;
+      }
+      borrowing.returnDate = getCurrentDate();
+    });
   }
 //  The deleteBook function attempts to remove a book from the catalog based on the provided bookId. It first loads the current state and checks if there is an active borrowing for the specified book using the getOpenBorrowing function. If there is an active borrowing, it returns false, indicating that the book cannot be deleted while it is currently borrowed. If there are no active borrowings for the book, it filters out the book from the state's books array, saves the updated state back to localStorage, and returns true to indicate that the book was successfully deleted from the catalog.
   function deleteBook(bookId) {
@@ -319,17 +385,22 @@
   }
 // The upsertBook is responsible for adding a new book to the catalog or updating an existing book's information based on the provided bookData object. It first loads the current state and checks if the bookData contains an id property. If it does, it attempts to find a matching book in the state by comparing the IDs. If a match is found, it updates the existing book's properties with the new data from bookData while ensuring that the ID remains consistent. If no match is found (i.e., it's a new book), it calculates the next available ID by finding the maximum existing book ID and adding one, then adds a new book object to the state's books array with default values for featured and year if they are not provided. Finally, it saves the updated state back to localStorage.
   function upsertBook(bookData) {
-    const state = loadState();
-    if (bookData.id) {
-      const match = state.books.find((book) => Number(book.id) === Number(bookData.id));
-      if (match) {
-        Object.assign(match, bookData, { id: Number(bookData.id) });
+    updateState((state) => {
+      if (bookData.id) {
+        const match = state.books.find((book) => Number(book.id) === Number(bookData.id));
+        if (match) {
+          Object.assign(match, bookData, { id: Number(bookData.id) });
+        }
+        return;
       }
-    } else {
-      const nextId = Math.max(0, ...state.books.map((item) => item.id)) + 1;
-      state.books.push({ ...bookData, id: nextId, featured: false, year: 2026 });
-    }
-    saveState(state);
+
+      state.books.push({
+        ...bookData,
+        id: getNextId(state.books),
+        featured: false,
+        year: 2026
+      });
+    });
   }
 //
   function getQueryParam(name) {
@@ -337,30 +408,25 @@
   }
 // The createStatusMarkup function generates HTML markup for displaying the status of a book (e.g., available, borrowed, overdue)
   function createStatusMarkup(status) {
-    const label = status.charAt(0).toUpperCase() + status.slice(1);
-    return `<span class="status-pill status-${status}">${label}</span>`;
+    return `<span class="status-pill status-${status}">${getStatusLabel(status)}</span>`;
   }
 // The attachBorrowListeners function adds click event listeners to all elements within the specified scope that have a data-borrow attribute. When a borrow button is clicked, it attempts to borrow the corresponding book using the borrowBook function. If the borrowing is successful, it displays an alert confirming the action and reloads the page to reflect the updated state. If the book is unavailable for borrowing, it shows an alert indicating that the book cannot be borrowed at the moment.
   function attachBorrowListeners(scope) {
-    scope.querySelectorAll("[data-borrow]").forEach((button) => {
-      button.addEventListener("click", () => {
-        const success = borrowBook(Number(button.dataset.borrow));
-        if (success) {
-          window.alert("Book borrowed successfully. The account page has been updated.");
-          window.location.reload();
-        } else {
-          window.alert("This book is currently unavailable.");
-        }
-      });
+    bindDataAction(scope, "data-borrow", (button) => {
+      const success = borrowBook(Number(button.dataset.borrow));
+      if (success) {
+        window.alert("Book borrowed successfully. The account page has been updated.");
+        reloadPage();
+        return;
+      }
+      window.alert("This book is currently unavailable.");
     });
   }
 // The attachReturnListeners function adds click event listeners to all elements within the specified scope that have a data-return attribute. When a return button is clicked, it calls the returnBook function with the corresponding borrowing ID to mark the book as returned, and then reloads the page to update the account information and reflect the change in book status.
   function attachReturnListeners(scope) {
-    scope.querySelectorAll("[data-return]").forEach((button) => {
-      button.addEventListener("click", () => {
-        returnBook(Number(button.dataset.return));
-        window.location.reload();
-      });
+    bindDataAction(scope, "data-return", (button) => {
+      returnBook(Number(button.dataset.return));
+      reloadPage();
     });
   }
 // The renderBookCard function generates the HTML markup for displaying a single book card, including its cover, title, author, and status.
@@ -369,11 +435,7 @@
     return `
       <article class="book-card">
         <div class="book-cover">
-          <img
-            src="${book.cover || "images/books/placeholder-book.svg"}"
-            alt="${book.title} book cover"
-            onerror="this.onerror=null;this.src='images/books/placeholder-book.svg';"
-          >
+          ${getBookImageMarkup(book)}
         </div>
         <p class="eyebrow">${book.category}</p>
         <h3>${book.title}</h3>
@@ -383,7 +445,7 @@
         </div>
         <footer>
           ${createStatusMarkup(status)}
-          <a class="secondary-btn" href="book-details.html?id=${book.id}">View Book</a>
+          <a class="secondary-btn" href="${pageMap.details}?id=${book.id}">View Book</a>
         </footer>
       </article>
     `;
@@ -395,7 +457,7 @@
     const featuredBooks = document.getElementById("featuredBooks");
 
     if (categoryGrid) {
-      categoryGrid.innerHTML = categoryMeta.map((category) => `
+      setContent(categoryGrid, joinMarkup(categoryMeta.map((category) => `
         <article class="category-card">
           <div class="category-card-top">
             <div>
@@ -409,24 +471,34 @@
           </div>
           <button type="button" class="secondary-btn" data-category-link="${category.name}">View Books</button>
         </article>
-      `).join("");
+      `)));
 // This part of the renderHomePage function adds click event listeners to each category button in the category grid. When a button is clicked, it constructs a new URL for the search page with a query parameter for the selected category, and then navigates the browser to that URL, allowing users to view books filtered by the chosen category.
-      categoryGrid.querySelectorAll("[data-category-link]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const url = new URL(pageMap.search, window.location.href);
-          url.searchParams.set("category", button.dataset.categoryLink);
-          window.location.href = url.toString();
-        });
+      bindDataAction(categoryGrid, "data-category-link", (button) => {
+        const url = new URL(pageMap.search, window.location.href);
+        url.searchParams.set("category", button.dataset.categoryLink);
+        setRedirect(url.toString());
       });
     }
 // This part of the renderHomePage function checks if the featuredBooks element exists and, if it does, generates the HTML markup for each featured book by filtering the books in the state for those marked as featured and using the renderBookCard function to create the markup for each book. It then sets the innerHTML of the featuredBooks element to this generated markup and attaches borrow listeners to enable borrowing functionality for the featured books.
     if (featuredBooks) {
-      featuredBooks.innerHTML = state.books
-        .filter((book) => book.featured)
-        .map((book) => renderBookCard(state, book))
-        .join("");
+      setContent(featuredBooks, joinMarkup(
+        state.books
+          .filter((book) => book.featured)
+          .map((book) => renderBookCard(state, book))
+      ));
       attachBorrowListeners(featuredBooks);
     }
+  }
+
+  function filterBooks(books, keyword, category) {
+    const normalizedKeyword = keyword.trim().toLowerCase();
+    return books.filter((book) => {
+      const matchesKeyword = !normalizedKeyword
+        || book.title.toLowerCase().includes(normalizedKeyword)
+        || book.author.toLowerCase().includes(normalizedKeyword);
+      const matchesCategory = !category || book.category === category;
+      return matchesKeyword && matchesCategory;
+    });
   }
 // The renderSearchPage function is responsible for rendering the search page, including the search form, category filter, and search results. It loads the current state, populates the category select dropdown, and sets up event listeners for the search form submission to filter and display books based on the search criteria entered by the user.
   function renderSearchPage() {
@@ -441,27 +513,15 @@
       return;
     }
 // Populate the category select dropdown with available categories
-    categoryMeta.forEach((item) => {
-      const option = document.createElement("option");
-      option.value = item.name;
-      option.textContent = item.name;
-      categorySelect.appendChild(option);
-    });
+    categorySelect.innerHTML += joinMarkup(categoryMeta.map((item) => `
+      <option value="${item.name}">${item.name}</option>
+    `));
     categorySelect.value = queryCategory;
 // The updateResults function is responsible for filtering the books based on the search keyword and selected category, updating the search summary with the number of results found, and rendering the filtered books in the search results section. It also attaches borrow listeners to the rendered book cards to enable borrowing functionality directly from the search results.
     const updateResults = () => {
-      const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
-      const category = categorySelect.value;
-      const filtered = state.books.filter((book) => {
-        const matchesKeyword = !keyword ||
-          book.title.toLowerCase().includes(keyword) ||
-          book.author.toLowerCase().includes(keyword);
-        const matchesCategory = !category || book.category === category;
-        return matchesKeyword && matchesCategory;
-      });
-
-      summary.textContent = `${filtered.length} book(s) found${category ? ` in ${category}` : ""}.`;
-      results.innerHTML = filtered.map((book) => renderBookCard(state, book)).join("");
+      const filtered = filterBooks(state.books, form.elements.searchInput.value, categorySelect.value);
+      summary.textContent = `${filtered.length} book(s) found${categorySelect.value ? ` in ${categorySelect.value}` : ""}.`;
+      setContent(results, joinMarkup(filtered.map((book) => renderBookCard(state, book))));
       attachBorrowListeners(results);
     };
 // Set up event listener for the search form submission
@@ -483,19 +543,15 @@
     const id = Number(getQueryParam("id")) || state.books[0].id;
     const book = getBookById(state, id);
     if (!book) {
-      container.innerHTML = "<p>Book not found.</p>";
+      setContent(container, "<p>Book not found.</p>");
       return;
     }
 // This generates the HTML markup for the book details page, including the book's category, title,... and a list of details such as ISBN and publication year. It also includes a status indicator and buttons for borrowing the book or returning to the search page. The borrow button is conditionally rendered based on the availability of the book, and event listeners are attached to enable borrowing functionality.
     const status = getBookStatus(state, book.id);
-    container.innerHTML = `
+    setContent(container, `
       <div class="details-layout">
         <article class="book-visual">
-          <img
-            src="${book.cover || "images/books/placeholder-book.svg"}"
-            alt="${book.title} book cover"
-            onerror="this.onerror=null;this.src='images/books/placeholder-book.svg';"
-          >
+          ${getBookImageMarkup(book)}
         </article>
         <article>
           <p class="eyebrow">Catalog details</p>
@@ -517,9 +573,19 @@
           </footer>
         </article>
       </div>
-    `;
+    `);
 
     attachBorrowListeners(container);
+  }
+
+  function getUserBorrowings(state) {
+    return state.borrowings
+      .filter((item) => item.userId === 1)
+      .sort((a, b) => new Date(b.borrowDate) - new Date(a.borrowDate));
+  }
+
+  function getBorrowingStatus(state, entry) {
+    return entry.returnDate ? "returned" : getBookStatus(state, entry.bookId);
   }
 // The renderAccountPage function is responsible for rendering the user's account page, which includes sections for current borrowings, borrowing history, and fines. It loads the current state, retrieves the user's borrowing records, and generates the HTML markup to display active borrowings, historical records, and any fines associated with overdue books. It also attaches event listeners to enable returning books directly from the account page.
   function renderAccountPage() {
@@ -532,56 +598,52 @@
       return;
     }
 // This part of the renderAccountPage function filters the borrowings in the state to find those that belong to the current user (userId: 1) and sorts them by borrow date in descending order. It then separates active borrowings (those without a return date) from historical records and calculates any fines for overdue books. The account statistics are updated to show the number of active borrowings, total records, fine entries, and outstanding fine value. The current borrowings, borrowing history, and fines are rendered in their respective sections of the account page.
-    const borrowings = state.borrowings
-      .filter((item) => item.userId === 1)
-      .sort((a, b) => new Date(b.borrowDate) - new Date(a.borrowDate));
-
+    const borrowings = getUserBorrowings(state);
     const active = borrowings.filter((item) => !item.returnDate);
     const fines = borrowings
       .map((item) => ({ item, fine: calculateFine(item) }))
       .filter(({ fine }) => fine.daysLate > 0);
+    const totalFineAmount = fines.reduce((sum, entry) => sum + entry.fine.amount, 0);
 
-    stats.innerHTML = `
+    setContent(stats, `
       <article class="account-stat"><strong>${active.length}</strong><span class="muted-label">Active Borrowings</span></article>
       <article class="account-stat"><strong>${borrowings.length}</strong><span class="muted-label">Total Records</span></article>
       <article class="account-stat"><strong>${fines.length}</strong><span class="muted-label">Fine Entries</span></article>
-      <article class="account-stat"><strong>${fines.reduce((sum, entry) => sum + entry.fine.amount, 0)} SAR</strong><span class="muted-label">Outstanding Value</span></article>
-    `;
+      <article class="account-stat"><strong>${totalFineAmount} SAR</strong><span class="muted-label">Outstanding Value</span></article>
+    `);
 //  is populated with active borrowings, displaying the book's category, title, borrow date, due date, and status. If there are no active borrowings, a message is shown indicating that there are no currently borrowed books. The borrowing history table is filled with all borrowing records, showing the book title, borrow date, due date, return date, and status. The fines table lists any overdue borrowings along with the number of days late and the fine amount. Event listeners are attached to the return buttons to allow users to return books directly from their account page.
-    currentBorrowings.innerHTML = active.length
-      ? active.map((entry) => {
+    setContent(currentBorrowings, active.length
+      ? joinMarkup(active.map((entry) => {
           const book = getBookById(state, entry.bookId);
-          const status = getBookStatus(state, entry.bookId);
           return `
             <article class="borrow-card">
               <p class="eyebrow">${book.category}</p>
               <h3>${book.title}</h3>
               <p>Borrowed on ${formatDate(entry.borrowDate)} and due on ${formatDate(entry.dueDate)}.</p>
               <footer>
-                ${createStatusMarkup(status)}
+                ${createStatusMarkup(getBookStatus(state, entry.bookId))}
                 <button type="button" class="primary-btn" data-return="${entry.id}">Return Book</button>
               </footer>
             </article>
           `;
-        }).join("")
-      : "<p>No active borrowed books at the moment.</p>";
+        }))
+      : "<p>No active borrowed books at the moment.</p>");
 //  filled with all borrowing records, showing the book title, borrow date, due date, return date, and status. The fines table lists any overdue borrowings along with the number of days late and the fine amount. Event listeners are attached to the return buttons to allow users to return books directly from their account page.
-    historyTable.innerHTML = borrowings.map((entry) => {
+    setContent(historyTable, joinMarkup(borrowings.map((entry) => {
       const book = getBookById(state, entry.bookId);
-      const status = entry.returnDate ? "returned" : getBookStatus(state, entry.bookId);
       return `
         <tr>
           <td>${book.title}</td>
           <td>${formatDate(entry.borrowDate)}</td>
           <td>${formatDate(entry.dueDate)}</td>
           <td>${formatDate(entry.returnDate)}</td>
-          <td>${createStatusMarkup(status)}</td>
+          <td>${createStatusMarkup(getBorrowingStatus(state, entry))}</td>
         </tr>
       `;
-    }).join("");
+    })));
 // The fines table lists any overdue borrowings along with the number of days late and the fine amount. Event listeners are attached to the return buttons to allow users to return books directly from their account page.
-    fineTable.innerHTML = fines.length
-      ? fines.map(({ item, fine }) => {
+    setContent(fineTable, fines.length
+      ? joinMarkup(fines.map(({ item, fine }) => {
           const book = getBookById(state, item.bookId);
           const paidStatus = item.returnDate ? "paid" : "unpaid";
           return `
@@ -592,8 +654,8 @@
               <td>${createStatusMarkup(paidStatus)}</td>
             </tr>
           `;
-        }).join("")
-      : '<tr><td colspan="4">No fines recorded.</td></tr>';
+        }))
+      : renderEmptyRow("No fines recorded.", 4));
 
     attachReturnListeners(currentBorrowings);
   }
@@ -616,12 +678,9 @@
   }
 // The validateRequired function 
   function validateRequired(field, label) {
-    if (!field.value.trim()) {
-      setFormError(field, `${label} is required.`);
-      return false;
-    }
-    setFormError(field, "");
-    return true;
+    const valid = Boolean(field.value.trim());
+    setFormError(field, valid ? "" : `${label} is required.`);
+    return valid;
   }
 // The validateRequired function
   function validateEmail(field) {
@@ -631,6 +690,10 @@
     const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value.trim());
     setFormError(field, valid ? "" : "Enter a valid email address.");
     return valid;
+  }
+
+  function isFormValid(validators) {
+    return validators.every(Boolean);
   }
 //  responsible for rendering the login page and handling the login form submission. It validates the user or admin input.
   function renderLoginPage() {
@@ -648,11 +711,11 @@
       const password = form.elements.password;
       const role = form.elements.role;
 
-      const valid = [
+      const valid = isFormValid([
         validateEmail(email),
         validateRequired(password, "Password"),
         validateRequired(role, "Role")
-      ].every(Boolean);
+      ]);
 
       if (!valid) {
         message.textContent = "Please correct the highlighted fields.";
@@ -669,7 +732,7 @@
       });
 
       window.setTimeout(() => {
-        window.location.href = role.value === "admin" ? pageMap.admin : pageMap.home;
+        setRedirect(role.value === "admin" ? pageMap.admin : pageMap.home);
       }, 900);
     });
   }
@@ -685,12 +748,12 @@
       event.preventDefault();
       clearFormErrors(form);
 
-      const valid = [
+      const valid = isFormValid([
         validateRequired(form.elements.fullName, "Full name"),
         validateEmail(form.elements.email),
         validateRequired(form.elements.password, "Password"),
         validateRequired(form.elements.confirmPassword, "Confirm password")
-      ].every(Boolean);
+      ]);
 
       if (form.elements.password.value !== form.elements.confirmPassword.value) {
         setFormError(form.elements.confirmPassword, "Passwords do not match.");
@@ -705,7 +768,7 @@
 
       message.textContent = "Account created successfully. Redirecting to login...";
       window.setTimeout(() => {
-        window.location.href = pageMap.login;
+        setRedirect(pageMap.login);
       }, 900);
     });
   }
@@ -721,11 +784,11 @@
       event.preventDefault();
       clearFormErrors(form);
 
-      const valid = [
+      const valid = isFormValid([
         validateRequired(form.elements.name, "Name"),
         validateEmail(form.elements.email),
         validateRequired(form.elements.message, "Message")
-      ].every(Boolean);
+      ]);
 
       if (!valid) {
         message.textContent = "Please complete all fields before sending.";
@@ -749,6 +812,21 @@
     form.elements.isbn.value = book.isbn;
     form.elements.description.value = book.description;
   }
+
+  function getOverdueEntries(state) {
+    return state.borrowings.filter((entry) => !entry.returnDate && entry.dueDate < getCurrentDate());
+  }
+
+  function getAdminBookData(form) {
+    return {
+      id: form.elements.bookId.value ? Number(form.elements.bookId.value) : null,
+      title: form.elements.title.value.trim(),
+      author: form.elements.author.value.trim(),
+      category: form.elements.category.value.trim(),
+      isbn: form.elements.isbn.value.trim(),
+      description: form.elements.description.value.trim()
+    };
+  }
 //
   function renderAdminPage() {
     const table = document.getElementById("adminBookTable");
@@ -763,27 +841,23 @@
 //  responsible for rendering the admin page, including the book management table and the overdue items section. 
     const draw = () => {
       const currentState = loadState();
-      table.innerHTML = currentState.books.map((book) => {
-        const status = getBookStatus(currentState, book.id);
-        return `
-          <tr>
-            <td>${book.title}</td>
-            <td>${book.author}</td>
-            <td>${book.category}</td>
-            <td>${createStatusMarkup(status)}</td>
-            <td>
-              <button type="button" class="ghost-btn" data-edit-book="${book.id}">Edit</button>
-              <button type="button" class="ghost-btn" data-delete-book="${book.id}">Delete</button>
-            </td>
-          </tr>
-        `;
-      }).join("");
 
-      const overdueEntries = currentState.borrowings
-        .filter((entry) => !entry.returnDate && entry.dueDate < getCurrentDate());
+      setContent(table, joinMarkup(currentState.books.map((book) => `
+        <tr>
+          <td>${book.title}</td>
+          <td>${book.author}</td>
+          <td>${book.category}</td>
+          <td>${createStatusMarkup(getBookStatus(currentState, book.id))}</td>
+          <td>
+            <button type="button" class="ghost-btn" data-edit-book="${book.id}">Edit</button>
+            <button type="button" class="ghost-btn" data-delete-book="${book.id}">Delete</button>
+          </td>
+        </tr>
+      `)));
 
-      overdueCards.innerHTML = overdueEntries.length
-        ? overdueEntries.map((entry) => {
+      const overdueEntries = getOverdueEntries(currentState);
+      setContent(overdueCards, overdueEntries.length
+        ? joinMarkup(overdueEntries.map((entry) => {
             const book = getBookById(currentState, entry.bookId);
             const fine = calculateFine(entry);
             return `
@@ -795,25 +869,21 @@
                 <p>Estimated fine: ${fine.amount} SAR</p>
               </article>
             `;
-          }).join("")
-        : "<p>No overdue items right now.</p>";
+          }))
+        : "<p>No overdue items right now.</p>");
 // This part of the renderAdminPage function adds click event listeners to the edit and delete buttons in the book management table. 
-      table.querySelectorAll("[data-edit-book]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const book = getBookById(loadState(), Number(button.dataset.editBook));
-          fillAdminForm(book);
-          message.textContent = `Editing "${book.title}".`;
-        });
+      bindDataAction(table, "data-edit-book", (button) => {
+        const book = getBookById(loadState(), Number(button.dataset.editBook));
+        fillAdminForm(book);
+        message.textContent = `Editing "${book.title}".`;
       });
 
-      table.querySelectorAll("[data-delete-book]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const success = deleteBook(Number(button.dataset.deleteBook));
-          message.textContent = success
-            ? "Book deleted from the catalog."
-            : "Cannot delete a book while it is actively borrowed.";
-          draw();
-        });
+      bindDataAction(table, "data-delete-book", (button) => {
+        const success = deleteBook(Number(button.dataset.deleteBook));
+        message.textContent = success
+          ? "Book deleted from the catalog."
+          : "Cannot delete a book while it is actively borrowed.";
+        draw();
       });
     };
 
@@ -821,27 +891,20 @@
       event.preventDefault();
       clearFormErrors(form);
 // add valid for book
-      const valid = [
+      const valid = isFormValid([
         validateRequired(form.elements.title, "Title"),
         validateRequired(form.elements.author, "Author"),
         validateRequired(form.elements.category, "Category"),
         validateRequired(form.elements.isbn, "ISBN"),
         validateRequired(form.elements.description, "Description")
-      ].every(Boolean);
+      ]);
 
       if (!valid) {
         message.textContent = "Please correct the highlighted fields.";
         return;
       }
 
-      upsertBook({
-        id: form.elements.bookId.value ? Number(form.elements.bookId.value) : null,
-        title: form.elements.title.value.trim(),
-        author: form.elements.author.value.trim(),
-        category: form.elements.category.value.trim(),
-        isbn: form.elements.isbn.value.trim(),
-        description: form.elements.description.value.trim()
-      });
+      upsertBook(getAdminBookData(form));
 
       message.textContent = form.elements.bookId.value ? "Book updated successfully." : "Book added successfully.";
       form.reset();
@@ -859,7 +922,6 @@
   function init() {
     updateAuthNavigation();
 
-    const page = document.body.dataset.page;
     const handlers = {
       home: renderHomePage,
       search: renderSearchPage,
@@ -871,6 +933,7 @@
       admin: renderAdminPage
     };
 
+    const page = document.body.dataset.page;
     if (handlers[page]) {
       handlers[page]();
     }
