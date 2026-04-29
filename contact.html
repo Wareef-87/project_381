@@ -10,57 +10,80 @@
 
 <body data-page="contact">
   <header class="site-header">
-    <!--the logo — links back to the homepage.-->
-    <a href="index.html" class="brand-link" >
+    <a href="index.html" class="brand-link">
       <span class="brand-name">Book Hub</span>
     </a>
-  
+
     <nav class="site-nav" aria-label="Main navigation">
       <a href="index.html">Home</a>
       <a href="search.html">Search</a>
-      <a href="account.html">My Account</a>
+      <a href="account.html" data-auth-link="account">My Account</a>
+      <a href="admin/manage-books.html" data-auth-link="admin">Manage Books</a>
       <a href="contact.html" aria-current="page">Contact</a>
-      <a href="login.html" class="button-link">Login</a>
+      <a href="login.html" class="button-link" data-auth-link="login">Login</a>
+      <a href="login.html" class="button-link" data-auth-link="logout">Log Out</a>
     </nav>
   </header>
 
   <main class="page-shell">
-    <section class="section-shell two-column-grid">
-      <article class="info-card">
-        <p class="eyebrow">Library desk</p>
+    <section class="section-shell contact-simple-header">
+      <h1>We are here to help.</h1>
+      <p class="contact-intro">
+        Contact us if you need help with books, borrowing, or your account.
+      </p>
+    </section>
+
+    <section class="contact-layout">
+      <article class="info-card contact-info-card">
+        <p class="eyebrow">Library Desk</p>
         <h2>Reach the team</h2>
-        <ul class="plain-list">
-          <li>Email: library@yic.edu.sa</li>
-          <li>Phone: +966 14 123 4567</li>
-          <li>Location: Yanbu Industrial City, Saudi Arabia</li>
-          <li>Hours: Sunday to Thursday, 8:00 AM to 8:00 PM</li>
-        </ul>
+
+        <div class="contact-info-list">
+          <div class="contact-info-item">
+            <span class="contact-info-title">Email</span>
+            <p>example@gmail.com</p>
+          </div>
+          <div class="contact-info-item">
+            <span class="contact-info-title">Phone</span>
+            <p>+966 14 123 4567</p>
+          </div>
+          <div class="contact-info-item">
+            <span class="contact-info-title">Location</span>
+            <p>Yanbu Industrial City, Saudi Arabia</p>
+          </div>
+          <div class="contact-info-item">
+            <span class="contact-info-title">Hours</span>
+            <p>Sunday to Thursday, 8:00 AM to 8:00 PM</p>
+          </div>
+        </div>
       </article>
 
-      <section class="info-card">
-        <p class="eyebrow">Support request</p>
+      <section class="info-card contact-form-card">
+        <p class="eyebrow">Support Request</p>
         <h2>Send a message</h2>
+
         <form id="contactForm" class="stacked-form" novalidate>
+          <div class="contact-form-grid">
+            <label class="field">
+              <span>Name</span>
+              <input type="text" name="name" required placeholder="Your name">
+              <small class="error-text"></small>
+            </label>
 
-          <label class="field">
-            <span>Name</span>
-            <input type="text" name="name" required placeholder="Your name">
-            <small class="error-text"></small>
-          </label>
-
-          <label class="field">
-            <span>Email</span>
-            <input type="email" name="email" required placeholder="you@yic.edu.sa">
-            <small class="error-text"></small>
-          </label>
+            <label class="field">
+              <span>Email</span>
+              <input type="email" name="email" required placeholder="example@gmail.com">
+              <small class="error-text"></small>
+            </label>
+          </div>
 
           <label class="field">
             <span>Message</span>
-            <textarea name="message" rows="5" required placeholder="How can we help?"></textarea>
+            <textarea name="message" rows="6" required placeholder="How can we help you today?"></textarea>
             <small class="error-text"></small>
           </label>
 
-          <button type="submit" class="primary-btn">Send Message</button>
+          <button type="submit" class="primary-btn contact-submit">Send Message</button>
         </form>
 
         <p id="contactMessage" class="status-message"></p>
@@ -69,9 +92,10 @@
   </main>
 
   <footer class="page-footer">
-    <p>© 2026 Book Hub | All Rights Reserved</p>
+    <p>&copy; 2026 Book Hub | All Rights Reserved</p>
   </footer>
 
   <script src="assets/js/app.js"></script>
 </body>
+
 </html>

@@ -13,25 +13,27 @@
     <a href="../index.html" class="brand-link" aria-label="Book Hub home page">
       <span class="brand-name">Book Hub</span>
     </a>
+
     <nav class="site-nav" aria-label="Main navigation">
       <a href="../index.html">Home</a>
       <a href="../search.html">Search</a>
-      <a href="../account.html">User View</a>
+       <a href="../contact.html">Contact</a>
       <a href="manage-books.html" aria-current="page">Manage Books</a>
-      <a href="../login.html" class="button-link">Log Out</a>
+      <a href="../login.html" class="button-link" data-auth-link="logout">Log Out</a>
     </nav>
   </header>
 
   <main class="page-shell">
-    <section class="section-shell two-column-grid">
-      <section class="info-card">
-        <div class="section-heading">
-          <p class="eyebrow">Catalog management</p>
-          <h2>Add or update a book</h2>
-        </div>
+    
+
+    <section class="admin-layout">
+      <section class="info-card admin-form-card">
+        <p class="eyebrow">Create / Update</p>
+        <h2>Book Information</h2>
 
         <form id="adminBookForm" class="stacked-form" novalidate>
           <input type="hidden" name="bookId">
+
           <label class="field">
             <span>Title</span>
             <input type="text" name="title" required placeholder="Book title">
@@ -66,24 +68,22 @@
             <button type="submit" class="primary-btn">Save Book</button>
             <button id="adminResetButton" type="button" class="ghost-btn">Clear</button>
           </div>
-
         </form>
+
         <p id="adminMessage" class="status-message"></p>
       </section>
 
-      <article class="info-card">
-        <div class="section-heading">
-          <p class="eyebrow">Overdue tracking</p>
-          <h2>Late returns and estimated fines</h2>
-        </div>
+      <article class="info-card admin-overdue-card">
+        <p class="eyebrow">Overdue Items</p>
+        <h2>Late Returns</h2>
         <div id="overdueCards" class="card-stack"></div>
       </article>
     </section>
 
-    <section class="section-shell table-shell">
+    <section class="section-shell table-shell admin-table-card">
       <div class="section-heading">
-        <p class="eyebrow">Book inventory</p>
-        <h2>Current catalog overview</h2>
+        <p class="eyebrow">Book Inventory</p>
+        <h2>Manage Existing Books</h2>
       </div>
 
       <div class="table-wrap">
@@ -104,9 +104,10 @@
   </main>
 
   <footer class="page-footer">
-    <p>© 2026 Book Hub | All Rights Reserved</p>
+    <p>&copy; 2026 Book Hub | All Rights Reserved</p>
   </footer>
 
   <script src="../assets/js/app.js"></script>
 </body>
+
 </html>

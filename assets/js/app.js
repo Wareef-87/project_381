@@ -1,5 +1,6 @@
 (function () {
-  const STORAGE_KEY = "yic-library-state";
+  const STORAGE_KEY = "book-hub-state";
+  const AUTH_KEY = "book-hub-auth";
   const DAY_MS = 24 * 60 * 60 * 1000; // Calculates milliseconds in a full day (24h * 60m * 60s * 1000ms)
 
   const seedState = {
@@ -187,6 +188,51 @@
   function saveState(state) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
+
+  function getAuthState() {
+    try {
+      const saved = localStorage.getItem(AUTH_KEY);
+      return saved ? JSON.parse(saved) : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function setAuthState(authState) {
+    localStorage.setItem(AUTH_KEY, JSON.stringify(authState));
+  }
+
+  function clearAuthState() {
+    localStorage.removeItem(AUTH_KEY);
+  }
+
+  function updateAuthNavigation() {
+    const authState = getAuthState();
+    const accountLinks = document.querySelectorAll('[data-auth-link="account"]');
+    const adminLinks = document.querySelectorAll('[data-auth-link="admin"]');
+    const loginLinks = document.querySelectorAll('[data-auth-link="login"]');
+    const logoutLinks = document.querySelectorAll('[data-auth-link="logout"]');
+    const isAdmin = authState && authState.role === "admin";
+
+    accountLinks.forEach((link) => {
+      link.style.display = authState && !isAdmin ? "inline-flex" : "none";
+    });
+
+    adminLinks.forEach((link) => {
+      link.style.display = isAdmin ? "inline-flex" : "none";
+    });
+
+    loginLinks.forEach((link) => {
+      link.style.display = authState ? "none" : "inline-flex";
+    });
+
+    logoutLinks.forEach((link) => {
+      link.style.display = authState ? "inline-flex" : "none";
+      link.addEventListener("click", () => {
+        clearAuthState();
+      });
+    });
+  }
 // might delete innput information
   function getCurrentDate() {
     return "2026-04-15";
@@ -333,7 +379,7 @@
         <h3>${book.title}</h3>
         <div class="book-meta">
           <span>${book.author}</span>
-          <span>${status}</span>
+          <span>${book.year}</span>
         </div>
         <footer>
           ${createStatusMarkup(status)}
@@ -445,9 +491,11 @@
     container.innerHTML = `
       <div class="details-layout">
         <article class="book-visual">
-          <p class="eyebrow">${book.category}</p>
-          <h2>${book.title}</h2>
-          <p>${book.author}</p>
+          <img
+            src="${book.cover || "images/books/placeholder-book.svg"}"
+            alt="${book.title} book cover"
+            onerror="this.onerror=null;this.src='images/books/placeholder-book.svg';"
+          >
         </article>
         <article>
           <p class="eyebrow">Catalog details</p>
@@ -613,10 +661,15 @@
 //  In this demo, any email/password combination is accepted for both user and admin roles. The message is updated to indicate a successful login, and after a short delay, the user is redirected to the appropriate page based on their selected role (admin panel for admins and account page for regular users).
       message.textContent = role.value === "admin"
         ? "Login successful. Redirecting to the admin panel..."
-        : "Login successful. Redirecting to your account...";
+        : "Login successful. Redirecting to the home page...";
+
+      setAuthState({
+        email: email.value.trim(),
+        role: role.value
+      });
 
       window.setTimeout(() => {
-        window.location.href = role.value === "admin" ? pageMap.admin : pageMap.account;
+        window.location.href = role.value === "admin" ? pageMap.admin : pageMap.home;
       }, 900);
     });
   }
@@ -804,6 +857,8 @@
   }
 // The init function determines which page is currently being viewed by checking the data-page attribute on the body element.
   function init() {
+    updateAuthNavigation();
+
     const page = document.body.dataset.page;
     const handlers = {
       home: renderHomePage,

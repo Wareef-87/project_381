@@ -4,12 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> Book Hub | Home</title>
-  <!--Remix Icon-->
+  <title>Book Hub | Home</title>
   <link
-  href="https://cdn.jsdelivr.net/npm/remixicon@4.9.0/fonts/remixicon.css"
-  rel="stylesheet"
- />
+    href="https://cdn.jsdelivr.net/npm/remixicon@4.9.0/fonts/remixicon.css"
+    rel="stylesheet"
+  >
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 
@@ -22,11 +21,12 @@
     <nav class="site-nav" aria-label="Main navigation">
       <a href="index.html" aria-current="page">Home</a>
       <a href="search.html">Search</a>
-      <a href="account.html">My Account</a>
+      <a href="account.html" data-auth-link="account">My Account</a>
+      <a href="admin/manage-books.html" data-auth-link="admin">Manage Books</a>
       <a href="contact.html">Contact</a>
-      <a href="login.html" class="button-link">Login</a>
+      <a href="login.html" class="button-link" data-auth-link="login">Login</a>
+      <a href="login.html" class="button-link" data-auth-link="logout">Log Out</a>
     </nav>
-
   </header>
 
   <main class="page-shell">
@@ -39,12 +39,12 @@
           Search, explore, and borrow your favorite books anytime, anywhere.
         </p>
 
-        <div class="hero-actions"> <!--links-->
+        <div class="hero-actions">
           <a class="primary-btn" href="search.html">Explore Books</a>
           <a class="secondary-btn" href="register.html">Create Account</a>
         </div>
-
       </div>
+
       <div class="hero-image">
         <img src="images/section.jpg" alt="Books Image">
       </div>
@@ -52,7 +52,7 @@
 
     <section class="section-shell soft-panel">
       <div class="section-heading">
-        <p class="eyebrow"></p>
+        <p class="eyebrow">Books Types</p>
         <h2>Choose a type and explore the books you love</h2>
       </div>
       <div id="categoryGrid" class="category-grid"></div>
@@ -63,14 +63,15 @@
         <p class="eyebrow">Featured collection</p>
         <h2>Popular titles</h2>
       </div>
-      <div id="featuredBooks" class="book-grid" ></div>
+      <div id="featuredBooks" class="book-grid"></div>
     </section>
   </main>
 
   <footer class="page-footer">
-    <p>© 2026 Book Hub | All Rights Reserved</p>
+    <p>&copy; 2026 Book Hub | All Rights Reserved</p>
   </footer>
 
   <script src="assets/js/app.js"></script>
 </body>
+
 </html>

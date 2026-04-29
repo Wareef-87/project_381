@@ -20,9 +20,9 @@
     <nav class="site-nav" aria-label="Main navigation"> <!--Navigation menu with ARIA label for accessibility.-->
       <a href="index.html">Home</a>
       <a href="search.html">Search</a>
-      <a href="account.html" aria-current="page">My Account</a>
+      <a href="account.html" aria-current="page" data-auth-link="account">My Account</a>
       <a href="contact.html">Contact</a>
-      <a href="login.html" class="button-link">Log Out</a>
+      <a href="login.html" class="button-link" data-auth-link="logout">Log Out</a>
     </nav>
 
   </header>
@@ -31,8 +31,7 @@
     <section class="section-shell account-overview">
       <!--Displays the sections name.-->
       <div class="section-heading">
-        <p class="eyebrow">Student dashboard</p>
-        <h2>Library activity at a glance</h2>
+        <h2>Library activity </h2>
       </div>
       <div id="accountStats" class="account-stat-grid"></div> <!--grid (rows + columns)-->
     </section>
