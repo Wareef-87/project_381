@@ -1,3 +1,40 @@
+<?php
+require_once('includes/auth.php');
+require_once('includes/db.php');
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $fullName = clean_input($_POST['fullName'] ?? '');
+    $email = strtolower(clean_input($_POST['email'] ?? ''));
+    $password = $_POST['password'] ?? '';
+    $confirmPassword = $_POST['confirmPassword'] ?? '';
+
+    if ($fullName === '' || $email === '' || $password === '' || $confirmPassword === '') {
+        json_response(['success' => false, 'message' => 'All fields required'], 422);
+    }
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        json_response(['success' => false, 'message' => 'Invalid email'], 422);
+    }
+
+    if (strlen($password) < 6) {
+        json_response(['success' => false, 'message' => 'Password must be at least 6 characters'], 422);
+    }
+
+    if ($password !== $confirmPassword) {
+        json_response(['success' => false, 'message' => 'Passwords do not match'], 422);
+    }
+
+    try {
+        $stmt = $pdo->prepare("INSERT INTO users (full_name, email, password_hash, role) VALUES (?, ?, ?, 'user')");
+        $stmt->execute([$fullName, $email, $password]);
+    } catch (PDOException $e) {
+        json_response(['success' => false, 'message' => 'Email already exists or database error.'], 409);
+    }
+
+    json_response(['success' => true, 'message' => 'Account created successfully. You can login now.']);
+}?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,15 +47,15 @@
 
 <body data-page="register">
   <header class="site-header">
-    <a href="index.html" class="brand-link" aria-label="Book Hub home page">
+    <a href="index.php" class="brand-link" aria-label="Book Hub home page">
       <span class="brand-name">Book Hub</span>
     </a>
 
     <nav class="site-nav" aria-label="Main navigation">
-      <a href="index.html">Home</a>
-      <a href="search.html">Search</a>
-      <a href="login.html">Login</a>
-      <a href="contact.html">Contact</a>
+      <a href="index.php">Home</a>
+      <a href="search.php">Search</a>
+      <a href="login.php">Login</a>
+      <a href="contact.php">Contact</a>
     </nav>
   </header>
 
@@ -29,7 +66,7 @@
         <h2>Sign up for Reading Books</h2>
       </div>
 
-      <form id="registerForm" class="stacked-form" novalidate>
+      <form id="registerForm" class="stacked-form" method="post" action="register.php" novalidate>
         <label class="field">
           <span>Full name</span>
           <input type="text" name="fullName" placeholder="Enter your full name" required>

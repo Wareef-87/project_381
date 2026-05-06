@@ -1,4 +1,48 @@
+<?php
+require_once('includes/auth.php');
+require_once('includes/db.php');
 
+$user = current_user();
+
+if (isset($_GET['api'])) {
+    $user = require_login();
+
+    $current = $pdo->prepare(
+        "SELECT br.id AS borrowing_id, b.title, b.author, br.borrow_date, br.due_date
+         FROM borrowings br
+         JOIN books b ON b.id = br.book_id
+         WHERE br.user_id = ? AND br.status = 'borrowed'
+         ORDER BY br.due_date"
+    );
+    $current->execute([$user['id']]);
+
+    $history = $pdo->prepare(
+        "SELECT b.title, br.borrow_date, br.due_date, br.return_date, br.status
+         FROM borrowings br
+         JOIN books b ON b.id = br.book_id
+         WHERE br.user_id = ?
+         ORDER BY br.borrow_date DESC"
+    );
+    $history->execute([$user['id']]);
+
+    $fines = $pdo->prepare(
+        "SELECT b.title, f.days_late, f.amount, f.status
+         FROM fines f
+         JOIN borrowings br ON br.id = f.borrowing_id
+         JOIN books b ON b.id = br.book_id
+         WHERE br.user_id = ?
+         ORDER BY f.created_at DESC"
+    );
+    $fines->execute([$user['id']]);
+
+    json_response([
+        'success' => true,
+        'current' => $current->fetchAll(),
+        'history' => $history->fetchAll(),
+        'fines' => $fines->fetchAll(),
+    ]);
+}
+?>
 <!DOCTYPE html>
 <html lang="en"> <!-- Starts the HTML document and sets the language to English (important for SEO and accessibility). -->
 
@@ -15,15 +59,16 @@
 
   <header class="site-header">
 
-    <a href="index.html" class="brand-link" >
+    <a href="index.php" class="brand-link" >
       <span class="brand-name">Book Hub</span> <!--Displays the website name.-->
     </a>
     <nav class="site-nav" aria-label="Main navigation"> <!--Navigation menu with ARIA label for accessibility.-->
-      <a href="index.html">Home</a>
-      <a href="search.html">Search</a>
-      <a href="account.html" aria-current="page" data-auth-link="account">My Account</a>
-      <a href="contact.html">Contact</a>
-      <a href="login.html" class="button-link" data-auth-link="logout">Log Out</a>
+      <a href="index.php">Home</a>
+      <a href="search.php">Search</a>
+      <a href="account.php" aria-current="page" data-auth-link="account">My Account</a>
+      <a href="contact.php">Contact</a>
+      <a href="admin/manage-books.php" data-auth-link="admin">Manage Books</a>
+      <a href="login.php" class="button-link" data-auth-link="logout">Log Out</a>
     </nav>
 
   </header>

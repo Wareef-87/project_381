@@ -1,3 +1,4 @@
+<?php require_once __DIR__ . '/../includes/auth.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,22 +11,21 @@
 
 <body data-page="admin">
   <header class="site-header">
-    <a href="../index.html" class="brand-link" aria-label="Book Hub home page">
+    <a href="../index.php" class="brand-link" aria-label="Book Hub home page">
       <span class="brand-name">Book Hub</span>
     </a>
 
     <nav class="site-nav" aria-label="Main navigation">
-      <a href="../index.html">Home</a>
-      <a href="../search.html">Search</a>
-       <a href="../contact.html">Contact</a>
-      <a href="manage-books.html" aria-current="page">Manage Books</a>
-      <a href="../login.html" class="button-link" data-auth-link="logout">Log Out</a>
+      <a href="../index.php">Home</a>
+      <a href="../search.php">Search</a>
+      <a href="../account.php" data-auth-link="account">My Account</a>
+      <a href="../contact.php">Contact</a>
+      <a href="manage-books.php" aria-current="page">Manage Books</a>
+      <a href="../login.php" class="button-link" data-auth-link="logout">Log Out</a>
     </nav>
   </header>
 
   <main class="page-shell">
-    
-
     <section class="admin-layout">
       <section class="info-card admin-form-card">
         <p class="eyebrow">Create / Update</p>
