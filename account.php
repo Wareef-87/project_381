@@ -7,37 +7,34 @@ $user = current_user();
 if (isset($_GET['api'])) {
     $user = require_login();
 
-    $current = $pdo->prepare(
-        "SELECT br.id AS borrowing_id, b.title, b.author, br.borrow_date, br.due_date
-         FROM borrowings br
-         JOIN books b ON b.id = br.book_id
-         WHERE br.user_id = ? AND br.status = 'borrowed'
-         ORDER BY br.due_date"
-    );
-    $current->execute([$user['id']]);
+    $sql = "SELECT br.id AS borrowing_id, b.title, b.author, br.borrow_date, br.due_date
+            FROM borrowings br
+            JOIN books b ON b.id = br.book_id
+            WHERE br.user_id = ? AND br.status = 'borrowed'
+            ORDER BY br.due_date";
+    $currentBooks = $pdo->prepare($sql);
+    $currentBooks->execute([$user['id']]);
 
-    $history = $pdo->prepare(
-        "SELECT b.title, br.borrow_date, br.due_date, br.return_date, br.status
-         FROM borrowings br
-         JOIN books b ON b.id = br.book_id
-         WHERE br.user_id = ?
-         ORDER BY br.borrow_date DESC"
-    );
+    $sql = "SELECT b.title, br.borrow_date, br.due_date, br.return_date, br.status
+            FROM borrowings br
+            JOIN books b ON b.id = br.book_id
+            WHERE br.user_id = ?
+            ORDER BY br.borrow_date DESC";
+    $history = $pdo->prepare($sql);
     $history->execute([$user['id']]);
 
-    $fines = $pdo->prepare(
-        "SELECT b.title, f.days_late, f.amount, f.status
-         FROM fines f
-         JOIN borrowings br ON br.id = f.borrowing_id
-         JOIN books b ON b.id = br.book_id
-         WHERE br.user_id = ?
-         ORDER BY f.created_at DESC"
-    );
+    $sql = "SELECT b.title, f.days_late, f.amount, f.status
+            FROM fines f
+            JOIN borrowings br ON br.id = f.borrowing_id
+            JOIN books b ON b.id = br.book_id
+            WHERE br.user_id = ?
+            ORDER BY f.created_at DESC";
+    $fines = $pdo->prepare($sql);
     $fines->execute([$user['id']]);
 
     json_response([
         'success' => true,
-        'current' => $current->fetchAll(),
+        'current' => $currentBooks->fetchAll(),
         'history' => $history->fetchAll(),
         'fines' => $fines->fetchAll(),
     ]);

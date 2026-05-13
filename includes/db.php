@@ -21,8 +21,3 @@ try {
     echo json_encode(['success' => false, 'message' => 'Database connection failed.']);
     exit;
 }
-
-require_once __DIR__ . '/seed.php';
-ensure_database_schema($pdo);
-seed_default_admin($pdo);
-seed_default_books($pdo);

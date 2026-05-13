@@ -14,14 +14,17 @@ if ($bookId <= 0) {
     json_response(['success' => false, 'message' => 'Invalid book id.'], 422);
 }
 
-$check = $pdo->prepare("SELECT id FROM borrowings WHERE book_id = ? AND status = 'borrowed'");
-$check->execute([$bookId]);
+// Do not delete a book if someone is still borrowing it.
+$sql = "SELECT id FROM borrowings WHERE book_id = ? AND status = 'borrowed'";
+$stmt = $pdo->prepare($sql);
+$stmt->execute([$bookId]);
 
-if ($check->fetch()) {
+if ($stmt->fetch()) {
     json_response(['success' => false, 'message' => 'Cannot delete a borrowed book.'], 409);
 }
 
-$stmt = $pdo->prepare('DELETE FROM books WHERE id = ?');
+$sql = 'DELETE FROM books WHERE id = ?';
+$stmt = $pdo->prepare($sql);
 $stmt->execute([$bookId]);
 
 json_response(['success' => true, 'message' => 'Book deleted successfully.']);

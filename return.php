@@ -16,7 +16,8 @@ if ($borrowingId <= 0) {
 
 $pdo->beginTransaction();
 
-$stmt = $pdo->prepare("SELECT * FROM borrowings WHERE id = ? AND user_id = ? AND status = 'borrowed' FOR UPDATE");
+$sql = "SELECT * FROM borrowings WHERE id = ? AND user_id = ? AND status = 'borrowed' FOR UPDATE";
+$stmt = $pdo->prepare($sql);
 $stmt->execute([$borrowingId, $user['id']]);
 $borrowing = $stmt->fetch();
 
@@ -25,20 +26,24 @@ if (!$borrowing) {
     json_response(['success' => false, 'message' => 'Borrowing record not found.'], 404);
 }
 
-$return = $pdo->prepare("UPDATE borrowings SET return_date = CURDATE(), status = 'returned' WHERE id = ?");
-$return->execute([$borrowingId]);
+$sql = "UPDATE borrowings SET return_date = CURDATE(), status = 'returned' WHERE id = ?";
+$stmt = $pdo->prepare($sql);
+$stmt->execute([$borrowingId]);
 
-$bookUpdate = $pdo->prepare('UPDATE books SET available_copies = available_copies + 1 WHERE id = ?');
-$bookUpdate->execute([$borrowing['book_id']]);
+$sql = 'UPDATE books SET available_copies = available_copies + 1 WHERE id = ?';
+$stmt = $pdo->prepare($sql);
+$stmt->execute([$borrowing['book_id']]);
 
-$fineStmt = $pdo->prepare('SELECT GREATEST(DATEDIFF(CURDATE(), due_date), 0) AS late_days FROM borrowings WHERE id = ?');
-$fineStmt->execute([$borrowingId]);
-$lateDays = (int) $fineStmt->fetch()['late_days'];
+$sql = 'SELECT GREATEST(DATEDIFF(CURDATE(), due_date), 0) AS late_days FROM borrowings WHERE id = ?';
+$stmt = $pdo->prepare($sql);
+$stmt->execute([$borrowingId]);
+$lateDays = (int) $stmt->fetch()['late_days'];
 
 if ($lateDays > 0) {
     $amount = $lateDays * 2.00;
-    $fine = $pdo->prepare("INSERT INTO fines (borrowing_id, days_late, amount, status) VALUES (?, ?, ?, 'unpaid')");
-    $fine->execute([$borrowingId, $lateDays, $amount]);
+    $sql = "INSERT INTO fines (borrowing_id, days_late, amount, status) VALUES (?, ?, ?, 'unpaid')";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$borrowingId, $lateDays, $amount]);
 }
 
 $pdo->commit();

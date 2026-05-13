@@ -4,42 +4,44 @@ require_once('includes/db.php');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-  $email = strtolower(clean_input($_POST['email'] ?? ''));
-  $password = (string) ($_POST['password'] ?? '');
-  $role = clean_input($_POST['role'] ?? '');
+    $email = strtolower(clean_input($_POST['email'] ?? ''));
+    $password = (string) ($_POST['password'] ?? '');
+    $role = clean_input($_POST['role'] ?? '');
 
-  if ($email === '' || $password === '' || $role === '') {
-    json_response(['success' => false, 'message' => 'Please fill all fields.'], 422);
-  }
+    if ($email === '' || $password === '' || $role === '') {
+        json_response(['success' => false, 'message' => 'Please fill all fields.'], 422);
+    }
 
-  $selectedRole = $role === 'User' ? 'user' : $role;
-  $stmt = $pdo->prepare('SELECT id, full_name, email, password_hash, role FROM users WHERE email = ? AND role = ?');
-  $stmt->execute([$email, $selectedRole]);
-  $user = $stmt->fetch();
+    $selectedRole = $role === 'User' ? 'user' : $role;
+    $sql = 'SELECT id, full_name, email, password_hash, role FROM users WHERE email = ? AND role = ?';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$email, $selectedRole]);
+    $user = $stmt->fetch();
 
-  $passwordMatches = false;
-  if ($user) {
-    $savedPassword = (string) $user['password_hash'];
-    $passwordMatches = $password === $savedPassword || password_verify($password, $savedPassword);
-  }
+    $passwordIsCorrect = false;
+    if ($user) {
+        $savedPassword = (string) $user['password_hash'];
+        $passwordIsCorrect = $password === $savedPassword || password_verify($password, $savedPassword);
+    }
 
-  if (!$passwordMatches) {
-    json_response(['success' => false, 'message' => 'Wrong email, password, or role.'], 401);
-  }
+    if (!$passwordIsCorrect) {
+        json_response(['success' => false, 'message' => 'Wrong email, password, or role.'], 401);
+    }
 
-  if ($user['password_hash'] !== $password) {
-    $updatePassword = $pdo->prepare('UPDATE users SET password_hash = ? WHERE id = ?');
-    $updatePassword->execute([$password, $user['id']]);
-  }
+    if ($user['password_hash'] !== $password) {
+        $sql = 'UPDATE users SET password_hash = ? WHERE id = ?';
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$password, $user['id']]);
+    }
 
-  $_SESSION['user'] = [
-    'id' => (int) $user['id'],
-    'name' => $user['full_name'],
-    'email' => $user['email'],
-    'role' => $user['role'],
-  ];
+    $_SESSION['user'] = [
+        'id' => (int) $user['id'],
+        'name' => $user['full_name'],
+        'email' => $user['email'],
+        'role' => $user['role'],
+    ];
 
-  json_response(['success' => true, 'user' => $_SESSION['user']]);
+    json_response(['success' => true, 'user' => $_SESSION['user']]);
 }
 ?>
 <!DOCTYPE html>

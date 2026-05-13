@@ -26,14 +26,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        $stmt = $pdo->prepare("INSERT INTO users (full_name, email, password_hash, role) VALUES (?, ?, ?, 'user')");
+        $sql = "INSERT INTO users (full_name, email, password_hash, role) VALUES (?, ?, ?, 'user')";
+        $stmt = $pdo->prepare($sql);
         $stmt->execute([$fullName, $email, $password]);
     } catch (PDOException $e) {
         json_response(['success' => false, 'message' => 'Email already exists or database error.'], 409);
     }
 
     json_response(['success' => true, 'message' => 'Account created successfully. You can login now.']);
-}?>
+}
+?>
 
 <!DOCTYPE html>
 <html lang="en">
