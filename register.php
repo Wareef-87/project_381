@@ -25,10 +25,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         json_response(['success' => false, 'message' => 'Passwords do not match'], 422);
     }
 
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
     try {
         $sql = "INSERT INTO users (full_name, email, password_hash, role) VALUES (?, ?, ?, 'user')";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$fullName, $email, $password]);
+        $stmt->execute([$fullName, $email, $hashedPassword]);
     } catch (PDOException $e) {
         json_response(['success' => false, 'message' => 'Email already exists or database error.'], 409);
     }

@@ -158,7 +158,8 @@
             var show = true;
 
             if (type === "login") show = !session.loggedIn;
-            if (type === "logout" || type === "account") show = session.loggedIn;
+            if (type === "logout") show = session.loggedIn;
+            if (type === "account") show = session.loggedIn && session.user && session.user.role !== "admin";
             if (type === "admin") show = session.loggedIn && session.user && session.user.role === "admin";
 
             link.style.display = show ? "" : "none";
@@ -322,13 +323,16 @@
                 '<footer>' +
                 statusPill(book) +
                 '<a class="secondary-btn" href="' + pageMap.search + '">Back to Search</a>' +
-                '<button class="primary-btn" id="borrowBtn"' + (parseInt(book.available_copies, 10) < 1 ? " disabled" : "") + '>Borrow Book</button>' +
+                (session.user && session.user.role === "admin" ? "" : '<button class="primary-btn" id="borrowBtn"' + (parseInt(book.available_copies, 10) < 1 ? " disabled" : "") + '>Borrow Book</button>') +
                 '</footer>' +
                 '<p id="borrowMessage" class="status-message"></p>' +
                 '</article>' +
                 '</div>';
 
-            document.getElementById("borrowBtn").addEventListener("click", function () {
+            var borrowButton = document.getElementById("borrowBtn");
+            if (!borrowButton) return;
+
+            borrowButton.addEventListener("click", function () {
                 if (!session.loggedIn) {
                     window.location.href = pageMap.login;
                     return;

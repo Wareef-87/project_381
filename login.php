@@ -18,20 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([$email, $selectedRole]);
     $user = $stmt->fetch();
 
-    $passwordIsCorrect = false;
-    if ($user) {
-        $savedPassword = (string) $user['password_hash'];
-        $passwordIsCorrect = $password === $savedPassword || password_verify($password, $savedPassword);
-    }
-
-    if (!$passwordIsCorrect) {
+    if (!$user || !password_verify($password, $user['password_hash'])) {
         json_response(['success' => false, 'message' => 'Wrong email, password, or role.'], 401);
-    }
-
-    if ($user['password_hash'] !== $password) {
-        $sql = 'UPDATE users SET password_hash = ? WHERE id = ?';
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$password, $user['id']]);
     }
 
     $_SESSION['user'] = [

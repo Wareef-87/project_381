@@ -8,6 +8,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     json_response(['success' => false, 'message' => 'Invalid request.'], 405);
 }
 
+if ($user['role'] === 'admin') {
+    json_response(['success' => false, 'message' => 'Admins cannot borrow books.'], 403);
+}
+
 $bookId = isset($_POST['book_id']) ? (int) $_POST['book_id'] : 0;
 $loanDays = 14;
 
