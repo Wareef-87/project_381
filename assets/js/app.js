@@ -111,13 +111,11 @@
         if (path.indexOf("http") === 0 || path.indexOf("../") === 0) return path;
         return rootPrefix + path;
     }
-
-    function bookCover(book, index) {
-        if (book.cover_path) return coverPath(book.cover_path);
-        var number = (parseInt(book.id || index + 1, 10) - 1) % 6 + 1;
-        return rootPrefix + "images/books/book" + number + ".png";
-    }
-
+    
+function bookCover(book, index) {
+    if (book.cover_path) return coverPath(book.cover_path);
+    return rootPrefix + "images/books/no-cover.png";
+}
     function statusPill(book) {
         var available = parseInt(book.available_copies, 10) > 0;
         var className = available ? "status-available" : "status-unavailable";
@@ -149,6 +147,7 @@
             updateNavigation();
         });
     }
+    
 
     function updateNavigation() {
         var links = document.querySelectorAll("[data-auth-link]");

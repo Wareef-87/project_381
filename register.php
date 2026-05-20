@@ -4,8 +4,8 @@ require_once('includes/db.php');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $fullName = clean_input($_POST['fullName'] ?? '');
-    $email = strtolower(clean_input($_POST['email'] ?? ''));
+    $fullName = trim($_POST['fullName'] ?? '');
+    $email = strtolower(trim($_POST['email'] ?? ''));
     $password = $_POST['password'] ?? '';
     $confirmPassword = $_POST['confirmPassword'] ?? '';
 

@@ -4,9 +4,9 @@ require_once('includes/db.php');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $email = strtolower(clean_input($_POST['email'] ?? ''));
+    $email = strtolower(trim($_POST['email'] ?? ''));
     $password = (string) ($_POST['password'] ?? '');
-    $role = clean_input($_POST['role'] ?? '');
+    $role = trim($_POST['role'] ?? '');
 
     if ($email === '' || $password === '' || $role === '') {
         json_response(['success' => false, 'message' => 'Please fill all fields.'], 422);

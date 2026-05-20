@@ -6,8 +6,8 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
     $bookId = isset($_GET['id']) ? (int) $_GET['id'] : 0;
-    $keyword = clean_input($_GET['keyword'] ?? '');
-    $category = clean_input($_GET['category'] ?? '');
+    $keyword = trim($_GET['keyword'] ?? '');
+    $category = trim($_GET['category'] ?? '');
     $featured = isset($_GET['featured']) ? (int) $_GET['featured'] : null;
 
     // Start with all books, then add filters if the user sends them.
@@ -48,11 +48,11 @@ if ($method === 'POST') {
     require_admin();
 
     $bookId = isset($_POST['bookId']) ? (int) $_POST['bookId'] : 0;
-    $title = clean_input($_POST['title'] ?? '');
-    $author = clean_input($_POST['author'] ?? '');
-    $category = clean_input($_POST['category'] ?? '');
-    $isbn = clean_input($_POST['isbn'] ?? '');
-    $description = clean_input($_POST['description'] ?? '');
+    $title = trim($_POST['title'] ?? '');
+    $author = trim($_POST['author'] ?? '');
+    $category = trim($_POST['category'] ?? '');
+    $isbn = trim($_POST['isbn'] ?? '');
+    $description = trim($_POST['description'] ?? '');
 
     if ($title === '' || $author === '' || $category === '' || $isbn === '' || $description === '') {
         json_response(['success' => false, 'message' => 'Please complete all book fields.'], 422);

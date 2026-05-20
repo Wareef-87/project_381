@@ -3,15 +3,16 @@ require_once('includes/auth.php');
 require_once('includes/db.php');
 
 $user = current_user();
-
+//this page is only for logged in users, but we check again just in case.
 if (isset($_GET['api'])) {
+  // If the request is for API data, return JSON instead of HTML.
     $user = require_login();
 
     $sql = "SELECT br.id AS borrowing_id, b.title, b.author, br.borrow_date, br.due_date
             FROM borrowings br
             JOIN books b ON b.id = br.book_id
             WHERE br.user_id = ? AND br.status = 'borrowed'
-            ORDER BY br.due_date";
+            ORDER BY br.due_date";       
     $currentBooks = $pdo->prepare($sql);
     $currentBooks->execute([$user['id']]);
 
